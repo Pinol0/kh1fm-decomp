@@ -18,3 +18,13 @@ g_WorldDataName = 0x002BCCA0; // size:0x40
 g_AreaBinImgName = 0x002BCCE0; // size:0x40
 g_AreaBaseName = 0x002BCD20; // size:0x40
 g_AreaArchiveName = 0x002BCD60; // size:0x40
+
+// game/area.c
+Area_Setup = 0x001124F8; // type:func
+g_SystemFlags = 0x002BC0A8;
+g_WorldData = 0x004D92DC;
+g_AreaInfos = 0x002BCDAC;
+g_AreaInfoCount = 0x002BCDB0;
+g_AreaEntrances = 0x002BCDA0;
+g_AreaEntranceCount = 0x002BCDA4;
+g_AreaEntranceIndex = 0x002BCDA8;
