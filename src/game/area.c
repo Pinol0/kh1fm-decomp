@@ -157,6 +157,21 @@ typedef struct {
 
 
 extern AreaActor* D_002E26A0[3];
+s32 func_00105860(void);
+void func_0017F678(void);
+void func_00132550(void);
+void func_00175F58(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_00100AB0(void);
+void func_001C3770(void* arg0, s32 arg1);
+void func_00114830(void);
+void func_001115E0(void);
+void func_00111380(void);
+void func_001118C0(void);
+void func_001EC7C0(s32 arg0);
+extern s32 D_002B6774;
+extern s32 D_002BBE0C;
+extern s32 D_0029B410;
+extern s32 D_0029B414;
 void func_001EC7D0(s32 arg0);
 void func_001ED128(s32 arg0, s32 arg1);
 void func_00101628(void);
@@ -187,11 +202,15 @@ typedef struct {
 extern AreaLocation D_002BC148;
 extern AreaLocationEntrance D_002BCDC8;
 typedef struct {
-    /* bit 0  */ u32 unk_0 : 13;
+    /* bit 0  */ u32 unk_0 : 2;
+    /* bit 2  */ u32 unk_2 : 1;
+    /* bit 3  */ u32 unk_3 : 10;
     /* bit 13 */ u32 unk_13 : 1;
     /* bit 14 */ u32 unk_14 : 5;
     /* bit 19 */ u32 unk_19 : 1;
-    /* bit 20 */ u32 unk_20 : 12;
+    /* bit 20 */ u32 unk_20 : 7;
+    /* bit 27 */ u32 unk_27 : 1;
+    /* bit 28 */ u32 unk_28 : 4;
 } GameFlags;
 
 extern GameFlags D_002C5958;
@@ -487,7 +506,29 @@ void func_00112E08(void) {
 void func_00112E90(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112E98);
+void func_00112E98(void) {
+    func_001EC7D0(2);
+    func_001ED128(3, -9);
+    func_001ED128(0, -1);
+    func_001ED128(3, -1);
+    func_001ED128(0, 0);
+    func_001ED128(0, 1);
+    func_001ED128(1, 0);
+    func_001ED128(1, 1);
+    func_001ED128(0, -8);
+    func_001ED128(3, -8);
+    func_001ED128(0, -3);
+    func_001ED128(3, -3);
+    func_001ED128(0, -4);
+    func_001ED128(3, -4);
+    func_001ED128(0, -5);
+    func_001ED128(3, -5);
+    func_001ED128(0, -6);
+    func_001ED128(3, -6);
+    func_001ED128(0, -7);
+    func_001ED128(3, -7);
+    func_001ED128(3, -10);
+}
 
 void func_00112FA0(void) {
     func_00114820();
@@ -658,7 +699,38 @@ void func_00113518(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113558);
+/* Last step of an area change: clears the loading state and starts the area */
+s32 func_00113558(void) {
+    if (D_002B6774 != 0) {
+        return 0;
+    }
+    D_002BBE0C = 1;
+    func_00105860();
+    func_0017F678();
+    func_00132550();
+    D_002BCDEC = 1;
+    if (D_0029B410 != 0 && D_0029B414 != 0) {
+        func_00175F58(D_0029B410, D_0029B414, g_AreaNumber + 1, 100000);
+    }
+    func_00100AB0();
+    D_002C5958.unk_2 = 0;
+    D_002C5958.unk_27 = 0;
+    func_001C3770(D_002BCC90, 0);
+    D_002BCDBC = 0;
+    D_002BCDC0 = 0;
+    D_002BCDD8 = 0;
+    func_00114830();
+    D_002C1388 = 0;
+    if (D_002BBE1C == 1 || D_002B6474 == 1) {
+        func_001115E0();
+    }
+    D_002BBE1C = 0;
+    func_00111380();
+    func_001118C0();
+    func_001EC7C0(0);
+    D_002BCDC4 = 0;
+    return 4;
+}
 
 void func_00113688(void) {
     func_0011EF10(49900, func_00113558);
