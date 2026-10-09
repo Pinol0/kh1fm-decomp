@@ -1,13 +1,18 @@
 name: Build
 
+# Never run on pull requests: a pull request from a fork can change this workflow, and
+# the runner is a contributor's machine holding the retail executable. Contributors
+# verify their changes locally with their own copy; this job re-checks main after merge.
 on:
   push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     # Self-hosted: the retail executable only exists on the runner machine,
     # at the path in the runner's KH1FM_ELF environment variable.
+    if: github.repository == 'Pinol0/kh1fm-decomp' && github.event_name != 'pull_request'
     runs-on: [self-hosted, kh1fm]
     steps:
       - uses: actions/checkout@v7

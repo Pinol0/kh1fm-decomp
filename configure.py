@@ -107,6 +107,8 @@ def write_ninja(entries):
     ninja.rule("rom", description="rom $out", command=f"{CROSS}objcopy -O binary --gap-fill=0x00 $in $out")
     ninja.rule("check", description="check $in", command=f"sha1sum -c $in && touch $out")
     ninja.rule("report", description="objdiff report", command=f"{OBJDIFF} report generate -o $out")
+    # Preprocessed context for m2c and decomp.me scratches
+    ninja.rule("ctx", description="ctx $in", command="cpp -P -Iinclude -Isrc -DM2CTX -D'__attribute__(x)=' $in > $out")
 
     objects = []
     units = []
@@ -124,8 +126,12 @@ def write_ninja(entries):
             target = str(Path("expected") / f"{seg.name}.o")
             ninja.build(target, "as", str(seg.asm_out_path()))
             expected.append(target)
+            ctx = str(BUILD / "ctx" / f"{seg.name}.c")
+            ninja.build(ctx, "ctx", srcs[0])
             unit.update(target_path=target, base_path=obj)
             unit["metadata"]["source_path"] = srcs[0]
+            unit["scratch"] = {"platform": "ps2", "compiler": "ee-gcc2.96", "c_flags": CC_FLAGS.split(" -I")[0],
+                               "ctx_path": ctx, "build_ctx": True}
         elif isinstance(seg, seg_asm.CommonSegAsm):
             ninja.build(obj, "as", srcs)
             unit["target_path"] = obj  # not decompiled yet: no base object
