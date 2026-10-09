@@ -53,6 +53,24 @@ When `tools/diff.py` reports `0 differing lines` (a line differing only in a rel
 - If only a construct no programmer would write matches (`do { } while (0)`, a pointless temporary),
   keep it and mark the line with `// TODO fake match`.
 
+## Functions that will not match
+
+When a function is logically complete but a scheduling or register detail resists (a few
+permuter runs did not fix it), keep the C and move on:
+
+```c
+#ifdef NON_MATCHING
+// What it does, and what still differs.
+void func_XXXXXXXX(...) { ... }
+#else
+INCLUDE_ASM("asm/nonmatchings/game/area", func_XXXXXXXX);
+#endif
+```
+
+The normal build keeps the original asm (so the rom still matches and progress does not count
+it), while a build with `-DNON_MATCHING` compiles the C, which is what a port uses. Only do this
+for code you are confident is equivalent.
+
 ## Style
 
 - Names: `Module_Action` for functions (`Area_Setup`), `g_Name` for globals, `unk_XX` for unknown

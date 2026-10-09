@@ -32,10 +32,18 @@ typedef struct {
     /* 0x30 */ u8 unk_30[0x10];
 } AreaInfo; // size = 0x40
 
+typedef struct {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+    /* 0xC */ f32 rotY;
+} AreaActorPlace; // size = 0x10
+
 /* Ways into an area of the current world */
 typedef struct {
     /* 0x00 */ s32 area;
-    /* 0x04 */ u8 unk_04[0x3C];
+    /* 0x04 */ u8 unk_04[0xC];
+    /* 0x10 */ AreaActorPlace spawn[3]; // party members: 0 = Sora
 } AreaEntrance; // size = 0x40
 
 typedef struct {
@@ -146,14 +154,13 @@ typedef struct {
     /* 0x3C */ f32 rotY;
 } AreaActor;
 
-typedef struct {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-    /* 0xC */ f32 rotY;
-} AreaActorPlace; // size = 0x10
 
 extern AreaActor* D_002E26A0[3];
+extern s32 D_002BBE1C;
+void func_00104FD0(s32 member, f32* dest);
+void func_00111590(s32 member, f32* dest);
+void func_001130A0(s32 index, f32* dest);
+s32 func_001130E0(void);
 extern AreaActorPlace D_004D92F0[3];
 extern s32 D_002BCDE4;
 extern s32 D_002BCDEC;
@@ -384,15 +391,18 @@ void func_00113048(void) {
     }
 }
 
-// Copies the saved place of party member `index` to dest. Same instructions but the
-// address copies (move chain) differ; permuter best score 225 after 4 min.
-// void func_001130A0(s32 index, AreaActorPlace* dest) {
-//     dest->x = D_004D92F0[index].x;
-//     dest->y = D_004D92F0[index].y;
-//     dest->z = D_004D92F0[index].z;
-//     dest->rotY = D_004D92F0[index].rotY;
-// }
+#ifdef NON_MATCHING
+// Copies the saved place of party member `index` to dest. Equivalent; the address
+// register copies differ.
+void func_001130A0(s32 index, f32* dest) {
+    dest[0] = D_004D92F0[index].x;
+    dest[1] = D_004D92F0[index].y;
+    dest[2] = D_004D92F0[index].z;
+    dest[3] = D_004D92F0[index].rotY;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001130A0);
+#endif
 
 s32 func_001130E0(void) {
     s32 i;
@@ -405,11 +415,92 @@ s32 func_001130E0(void) {
     return 1000;
 }
 
+#ifdef NON_MATCHING
+// Equivalent; one branch is emitted as bnel instead of bne (delay slot filling).
+void func_00113138(f32* dest) {
+    s32 i = g_AreaEntranceIndex;
+
+    if (i == -1) {
+        i = g_AreaEntranceIndex = func_001130E0();
+    }
+    if (i < (s32)g_AreaEntranceCount) {
+        dest[0] = g_AreaEntrances[i].spawn[0].x;
+        dest[1] = g_AreaEntrances[g_AreaEntranceIndex].spawn[0].y;
+        dest[2] = g_AreaEntrances[g_AreaEntranceIndex].spawn[0].z;
+        dest[3] = g_AreaEntrances[g_AreaEntranceIndex].spawn[0].rotY;
+        if (D_002BCDD8 != 0) {
+            if (D_002BCDDC == 1) {
+                func_001130A0(0, dest);
+            }
+        }
+        if (D_002BBE1C == 1) {
+            func_00111590(0, dest);
+        }
+    } else {
+        func_00104FD0(0, dest);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00113138);
+#endif
 
+#ifdef NON_MATCHING
+// Equivalent; one branch is emitted as bnel instead of bne (delay slot filling).
+void func_00113270(f32* dest) {
+    s32 i = g_AreaEntranceIndex;
+
+    if (i == -1) {
+        i = g_AreaEntranceIndex = func_001130E0();
+    }
+    if (i < (s32)g_AreaEntranceCount) {
+        dest[0] = g_AreaEntrances[i].spawn[1].x;
+        dest[1] = g_AreaEntrances[g_AreaEntranceIndex].spawn[1].y;
+        dest[2] = g_AreaEntrances[g_AreaEntranceIndex].spawn[1].z;
+        dest[3] = g_AreaEntrances[g_AreaEntranceIndex].spawn[1].rotY;
+        if (D_002BCDD8 != 0) {
+            if (D_002BCDDC == 1) {
+                func_001130A0(1, dest);
+            }
+        }
+        if (D_002BBE1C == 1) {
+            func_00111590(1, dest);
+        }
+    } else {
+        func_00104FD0(0, dest);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00113270);
+#endif
 
+#ifdef NON_MATCHING
+// Equivalent; one branch is emitted as bnel instead of bne (delay slot filling).
+void func_001133A0(f32* dest) {
+    s32 i = g_AreaEntranceIndex;
+
+    if (i == -1) {
+        i = g_AreaEntranceIndex = func_001130E0();
+    }
+    if (i < (s32)g_AreaEntranceCount) {
+        dest[0] = g_AreaEntrances[i].spawn[2].x;
+        dest[1] = g_AreaEntrances[g_AreaEntranceIndex].spawn[2].y;
+        dest[2] = g_AreaEntrances[g_AreaEntranceIndex].spawn[2].z;
+        dest[3] = g_AreaEntrances[g_AreaEntranceIndex].spawn[2].rotY;
+        if (D_002BCDD8 != 0) {
+            if (D_002BCDDC == 1) {
+                func_001130A0(2, dest);
+            }
+        }
+        if (D_002BBE1C == 1) {
+            func_00111590(2, dest);
+        }
+    } else {
+        func_00104FD0(0, dest);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001133A0);
+#endif
 
 void func_001134D8(s32 arg0) {
     D_002BCDE4 = arg0;
@@ -448,12 +539,15 @@ s32 func_00113768(void) {
     do { return 4; } while (0); // TODO fake match
 }
 
-// Rounds addr up to a multiple of align. C version: the permuter could not match the
-// placement of mflo (5 min); kept as asm for now.
-// void* func_001137C8(void* addr, s32 align) {
-//     return ((s32)addr % align) ? (void*)((s32)addr / align * align + align) : addr;
-// }
+#ifdef NON_MATCHING
+// Rounds addr up to a multiple of align. Equivalent; mflo is scheduled before the branch
+// instead of in its delay slot.
+void* func_001137C8(void* addr, s32 align) {
+    return ((s32)addr % align) ? (void*)((s32)addr / align * align + align) : addr;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137C8);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137F8);
 
