@@ -29,7 +29,16 @@ typedef struct {
     /* bit 6 */ u32 unk_6 : 26;
 } SystemFlags;
 
+/* More game flags (D_002C5960) */
+typedef struct {
+    /* bit 0 */ u32 unk_0 : 2;
+    /* bit 2 */ u32 unk_2 : 1;
+    /* bit 3 */ u32 unk_3 : 1; /* player input comes from func_001271B0 */
+    /* bit 4 */ u32 unk_4 : 28;
+} GameFlags2;
+
 extern GameFlags D_002C5958;
+extern GameFlags2 D_002C5960;
 extern SystemFlags g_SystemFlags;
 extern f32 D_002BBDFC; /* frame time step */
 

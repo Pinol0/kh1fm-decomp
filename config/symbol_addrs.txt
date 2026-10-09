@@ -53,3 +53,6 @@ sceVu0ITOF0Vector = 0x00267610; // type:func
 sceVu0UnitMatrix = 0x00267620; // type:func
 sceVu0ClampVector = 0x00267908; // type:func
 sceVu0ScaleVectorXYZ = 0x00267E90; // type:func
+
+// game/player.c
+g_ActorStates = 0x00350D90; // size:0x100
