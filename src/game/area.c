@@ -123,8 +123,9 @@ void func_00111600(s32 world, s32 area, s32 arg2, s32 entrance);
 s32 func_0011C898(s32 arg0);
 void func_00114820(void);
 void func_00109558(s32 arg0);
-s32 func_00112840(void);
+s32 func_00112840(s32 arg0, s32 arg1, s32 arg2);
 s32 func_001129C8(void);
+void func_00112968(void);
 s32 func_00112AD8(void);
 void func_00112928(void);
 void func_00112B18(void);
@@ -156,6 +157,21 @@ typedef struct {
 
 
 extern AreaActor* D_002E26A0[3];
+void func_001EC7D0(s32 arg0);
+void func_001ED128(s32 arg0, s32 arg1);
+void func_00101628(void);
+void func_0014A090(void);
+void func_00146928(s32 arg0);
+s32 func_0011CDF0(s32 arg0, s32 arg1, void* callback);
+void func_00112820(void);
+void func_00176170(void);
+void func_001761B0(void);
+extern char g_WorldDataName[0x40];
+extern u8 g_WorldDataBuffer[]; /* fixed buffer at 0x9A0000 */
+extern s32 D_002BC138; /* world of the world data in memory */
+extern s32 D_002BCDB4;
+extern s32 D_002BCDB8;
+extern s32 D_002BCDC4;
 
 typedef struct {
     /* 0x0 */ s32 world;
@@ -300,7 +316,27 @@ void func_00112820(void) {
     func_0011EF10(50000, func_001017E8);
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112840);
+s32 func_00112840(s32 arg0, s32 arg1, s32 arg2) {
+    func_001EC7D0(2);
+    func_001ED128(3, -9);
+    func_00101628();
+    func_001ED128(0, -1);
+    func_001ED128(3, -1);
+    func_001ED128(0, 0);
+    func_001ED128(0, 1);
+    func_001ED128(1, 0);
+    func_001ED128(1, 1);
+    func_0014A090();
+    func_00146928(-3);
+    func_00146928(-4);
+    func_00146928(-5);
+    func_00146928(-6);
+    func_00146928(-7);
+    func_001ED128(0, -8);
+    func_001ED128(3, -8);
+    func_001ED128(3, -10);
+    return func_0011CDF0(-1, arg2, func_00112820);
+}
 
 void func_00112928(void) {
     char buf[0x40];
@@ -318,7 +354,33 @@ void func_00112968(void) {
     func_00112928();
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_001129C8);
+/* Area change step: (re)loads the world data unless the world is unchanged */
+s32 func_001129C8(void) {
+    if (D_002BCDBC == 1 && D_002BCDC0 == 0) {
+        return 0;
+    }
+    Area_SetFileNames();
+    D_002BCDB4 = 0;
+    D_002BCDB8 = 0;
+    D_002BCDC4 = 1;
+    g_WorldData = (WorldDataHeader*)g_WorldDataBuffer;
+    func_00176170();
+    func_001761B0();
+    if (D_002BC138 == g_AreaWorld) {
+        D_002BCDB4 = 1;
+    }
+    if (D_002BCDB4 == 1) {
+        Area_Setup();
+        if (D_002BCDD8 != 0) {
+            func_00112928();
+        } else {
+            func_00112820();
+        }
+    } else {
+        func_00120748(g_WorldDataName, (s32)g_WorldData, func_00112968, 0);
+    }
+    return 4;
+}
 
 s32 func_00112AD8(void) {
     func_001C1F60();
