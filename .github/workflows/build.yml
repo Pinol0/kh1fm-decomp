@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Self-hosted: the retail executable only exists on the runner machine,
+    # at the path in the runner's KH1FM_ELF environment variable.
+    runs-on: [self-hosted, kh1fm]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provide the game executable
+        run: cp "$KH1FM_ELF" SLPS_251.98
+
+      - name: Build container
+        run: podman build -q -t kh1fm -f docker/Containerfile .
+
+      - name: Configure and build (must match the retail binary)
+        run: podman run --rm -v "$PWD":/work:Z kh1fm sh -c "./configure.py && ninja"
+
+      - name: Progress
+        run: |
+          podman run --rm -v "$PWD":/work:Z kh1fm sh -c "ninja report && python3 tools/progress.py" > progress.txt
+          cat progress.txt
+          { echo '```'; cat progress.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SLPS_251.98_report
+          path: build/report.json
+
+      - name: Remove game files
+        if: always()
+        run: rm -f SLPS_251.98 SLPS_251.98.rom
