@@ -6,5 +6,6 @@
 char* strcpy(char* dest, const char* src);
 char* strcat(char* dest, const char* src);
 int sprintf(char* str, const char* format, ...);
+void* memset(void* dest, int value, unsigned int size);
 
 #endif

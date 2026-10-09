@@ -5,6 +5,7 @@ _start = 0x00100008; // type:func
 sprintf = 0x00250EB0; // type:func
 strcat = 0x00250F40; // type:func
 strcpy = 0x002511B0; // type:func
+memset = 0x00250054; // type:func
 
 // game/area_name.c
 Area_GetWorldPrefix = 0x00112270; // type:func

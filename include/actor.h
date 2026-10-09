@@ -18,6 +18,16 @@ struct ActorUnk130 {
     /* 0x54 */ s8 unk_54; /* 0: input comes from func_001271B0 */
 };
 
+struct ActorUnk14C_2C {
+    /* 0x00 */ u8 unk_00[4];
+    /* 0x04 */ u32 unk_04;
+};
+
+struct ActorUnk14C {
+    /* 0x00 */ u8 unk_00[0x2C];
+    /* 0x2C */ struct ActorUnk14C_2C* unk_2C;
+};
+
 typedef struct Actor Actor;
 typedef void (*ActorStateFunc)(Actor* actor, sceVu0FVECTOR move);
 
@@ -42,7 +52,8 @@ struct Actor {
     /* 0x088 */ u32 unk_088;
     /* 0x08C */ u8 unk_08C[0xA4];
     /* 0x130 */ struct ActorUnk130* unk_130;
-    /* 0x134 */ u8 unk_134[0x1C];
+    /* 0x134 */ u8 unk_134[0x18];
+    /* 0x14C */ struct ActorUnk14C* unk_14C;
     /* 0x150 */ f32 targetAngle;
     /* 0x154 */ u8 unk_154[0x10];
     /* 0x164 */ s32 motion;           /* current motion (animation) */
@@ -58,7 +69,9 @@ struct Actor {
     /* 0x398 */ s32 unk_398;
     /* 0x39C */ u8 unk_39C[2];
     /* 0x39E */ u8 unk_39E;
-    /* 0x39F */ u8 unk_39F[0x21];
+    /* 0x39F */ u8 unk_39F[0x11];
+    /* 0x3B0 */ f32 unk_3B0;
+    /* 0x3B4 */ u8 unk_3B4[0xC];
     /* 0x3C0 */ sceVu0FVECTOR unk_3C0; /* velocity used by the physics */
     /* 0x3D0 */ u8 unk_3D0[0x70];
     /* 0x440 */ u64 unk_440;           /* bit 33: the actor does not take move input */
