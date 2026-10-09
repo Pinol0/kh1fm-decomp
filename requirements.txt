@@ -1,0 +1,5 @@
+splat64[mips]==0.50.0
+spimdisasm>=1.42.4
+ninja_syntax
+pyelftools
+m2c @ git+https://github.com/matt-kempster/m2c.git

@@ -1,0 +1,17 @@
+# Game files: never commit
+*.iso
+SLPS_*
+!SLPS_*.ld
+*.rom
+# Generated
+build/
+asm/
+expected/
+build.ninja
+.ninja_*
+.splache
+objdiff.json
+ctx.c
+nonmatchings/
+__pycache__/
+tools/cc/

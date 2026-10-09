@@ -1,0 +1,51 @@
+name: Kingdom Hearts Final Mix (JP)
+sha1: b62bf252fdaf0b1a726668e28c244e1d83bcb146
+options:
+  basename: SLPS_251.98
+  target_path: SLPS_251.98.rom
+  elf_path: build/SLPS_251.98.elf
+  base_path: ..
+  platform: ps2
+  compiler: EEGCC
+
+  gp_value: 0x00494050
+
+  asm_path: asm
+  src_path: src
+  build_path: build
+
+  ld_script_path: build/SLPS_251.98.ld
+  ld_dependencies: True
+  ld_wildcard_sections: True
+  ld_bss_contains_common: True
+
+  create_asm_dependencies: True
+  find_file_boundaries: False
+  o_as_suffix: True
+
+  symbol_addrs_path:
+    - config/symbol_addrs.txt
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  named_regs_for_c_funcs: False
+  mips_abi_gpr: numeric
+  subalign: 8
+
+  section_order: [.text, .data, .rodata, .bss]
+  auto_link_sections: [.data, .rodata, .bss]
+
+segments:
+  - name: main
+    type: code
+    start: 0x000000
+    vram: 0x00100000
+    bss_size: 0x1E0F80
+    subsegments:
+      - [0x000000, asm]
+      - [0x172C70, data]
+  - [0x394050]

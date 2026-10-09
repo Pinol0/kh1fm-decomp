@@ -1,0 +1,12 @@
+# Build environment: Ubuntu + GNU MIPS binutils + Python tooling.
+# The game executable is never part of the image; mount the repo at run time.
+FROM docker.io/library/ubuntu:24.04
+RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y --no-install-recommends \
+        binutils-mips-linux-gnu build-essential git ninja-build python3 python3-pip python3-venv \
+        libc6:i386 ca-certificates curl xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -U -r /tmp/requirements.txt
+WORKDIR /work
