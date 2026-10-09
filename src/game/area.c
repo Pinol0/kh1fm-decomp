@@ -98,6 +98,35 @@ extern AreaPair D_002C1378;
 extern s32 D_002E27A4;
 
 void Area_SetFileNames(void);
+/* Area change sequence: each step queues the next one through func_0011EF10 */
+void func_0011EF10(s32 arg0, void* callback);
+s32 func_001017E8(void);
+void func_0011CB08(u8* arg0);
+s32 func_001559F0(s32 arg0, s32 arg1);
+void func_00120748(u8* arg0, s32 arg1, void* callback, s32 arg3);
+void func_0010E750(void);
+void func_0010B030(void* arg0);
+void* func_001137C8(void* arg0, s32 arg1);
+void func_001C1F60(void);
+void func_00122330(void);
+void func_00100AE0(void);
+void func_00111600(s32 world, s32 area, s32 arg2, s32 entrance);
+s32 func_0011C898(s32 arg0);
+void func_00114820(void);
+void func_00109558(s32 arg0);
+s32 func_00112840(void);
+s32 func_001129C8(void);
+s32 func_00112AD8(void);
+void func_00112928(void);
+void func_00112B18(void);
+void func_00112FD0(s32 arg0);
+
+extern void* D_002A3F38;
+extern s32 D_002A3F40;
+extern s32 D_002B6474;
+extern s32 D_002BCDC0;
+extern s32 D_004D92E0;
+
 s32 func_00111660(s32 world, s32 area);
 void func_001119D0(void);
 void func_00103280(f32 a, f32 b, f32 c, f32 d);
@@ -175,31 +204,80 @@ void Area_Setup(void) {
     D_002E27A4 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112820);
+void func_00112820(void) {
+    func_0011EF10(50000, func_001017E8);
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112840);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112928);
+void func_00112928(void) {
+    u8 buf[0x40];
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112968);
+    func_0011CB08(buf);
+    func_00120748(buf, func_001559F0(0x34, 4), func_00112840, 0);
+}
+
+void func_00112968(void) {
+    Area_Setup();
+    func_0010E750();
+    func_0010B030(D_002BCDE0);
+    D_002A3F38 = D_002BCDE0;
+    D_002A3F38 = func_001137C8(D_002BCDE0, 0x40);
+    func_00112928();
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001129C8);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112AD8);
+s32 func_00112AD8(void) {
+    func_001C1F60();
+    D_002B6474 = 0;
+    func_00122330();
+    func_0011EF10(0x2E62F, func_001129C8);
+    return 4;
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112B18);
+void func_00112B18(void) {
+    func_00100AE0();
+    func_0011EF10(0x2E630, func_00112AD8);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112B48);
+void func_00112B48(s32 world, s32 area, s32 arg2, s32 entrance) {
+    g_AreaEntranceIndex = entrance;
+    g_AreaWorld = world;
+    g_AreaNumber = area;
+    D_002BC134 = arg2;
+    func_00111600(world, area, arg2, entrance);
+    func_00112B18();
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112B80);
+void func_00112B80(s32 world, s32 area, s32 arg2, s32 entrance) {
+    g_AreaEntranceIndex = entrance;
+    g_AreaWorld = world;
+    g_AreaNumber = area;
+    D_002BC134 = arg2;
+    func_00112B18();
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112BB8);
+void func_00112BB8(s32 entrance) {
+    g_AreaEntranceIndex = entrance;
+    g_AreaNumber = g_AreaEntrances[entrance].area;
+    D_002BC134 = func_00111660(g_AreaWorld, g_AreaNumber);
+    func_00112B18();
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112C08);
+void func_00112C08(s32 arg0) {
+    D_002A3F40 = arg0;
+    D_002BCDC0 = 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112C20);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112CF8);
+s32 func_00112CF8(void) {
+    func_0011C898(0);
+    D_002B6474 = 0;
+    func_00122330();
+    return 4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112D28);
 
@@ -212,17 +290,32 @@ void func_00112E90(void) {
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112E98);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112FA0);
+void func_00112FA0(void) {
+    func_00114820();
+    func_00109558(9);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112FC0);
+s32 func_00112FC0(void) {
+    return D_004D92E0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112FD0);
+void func_00112FD0(s32 arg0) {
+    D_004D92E0 = arg0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112FE0);
+void func_00112FE0(void) {
+    func_00114820();
+    func_00112FD0(1);
+    func_00109558(8);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113008);
+void func_00113008(void) {
+    func_001559F0(0x3D, 3);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113028);
+void func_00113028(void) {
+    func_001559F0(0, 0x40);
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00113048);
 

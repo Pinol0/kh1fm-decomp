@@ -28,10 +28,20 @@ a = disasm(f"expected/{unit}.o")
 b = disasm(f"build/src/{unit}.o")
 n = max(len(a), len(b))
 diffs = 0
+def same(x, y):
+    # A call or address of a function in the same file is relocated against the section
+    # (<.text>, with the offset in the instruction) in the built object: same final bytes.
+    if x == y:
+        return True
+    if "<.text>" in y and "<" in x:
+        return re.sub(r"\s*<[^>]*>$", "", x).split(",")[0] == re.sub(r"\s*<[^>]*>$", "", y).split(",")[0]
+    return False
+
+
 for i in range(n):
     x = a[i] if i < len(a) else ""
     y = b[i] if i < len(b) else ""
-    mark = " " if x == y else "|"
+    mark = " " if same(x, y) else "|"
     diffs += mark == "|"
     if show_all or mark == "|":
         print(f"{i*4:4x} {x:<48} {mark} {y}")
