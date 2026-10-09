@@ -18,6 +18,11 @@ struct ActorUnk130 {
     /* 0x54 */ s8 unk_54; /* 0: input comes from func_001271B0 */
 };
 
+struct ActorUnk134 {
+    /* 0x00 */ u8 unk_00[0x14];
+    /* 0x14 */ s32 unk_14;
+};
+
 struct ActorUnk14C_2C {
     /* 0x00 */ u8 unk_00[4];
     /* 0x04 */ u32 unk_04;
@@ -41,40 +46,59 @@ typedef struct {
 /* Characters and objects of the field (Sora is *D_002E26A0[0]). Partial. */
 struct Actor {
     /* 0x000 */ u32 flags;
-    /* 0x004 */ u8 unk_004[0xC];
+    /* 0x004 */ u8 unk_004[2];
+    /* 0x006 */ u8 kind;
+    /* 0x007 */ u8 unk_007[9];
     /* 0x010 */ sceVu0FVECTOR pos;    /* y points down */
     /* 0x020 */ sceVu0FVECTOR move;   /* direction in xyz, speed in w */
     /* 0x030 */ sceVu0FVECTOR facing; /* w: current angle around y */
-    /* 0x040 */ u8 unk_040[0x2C];
+    /* 0x040 */ u8 unk_040[0x10];
+    /* 0x050 */ sceVu0FVECTOR unk_050;
+    /* 0x060 */ u8 unk_060[0xC];
     /* 0x06C */ ActorParams* params;
     /* 0x070 */ s32 state;            /* index into the state handler table */
     /* 0x074 */ u8 unk_074[0x14];
     /* 0x088 */ u32 unk_088;
-    /* 0x08C */ u8 unk_08C[0xA4];
+    /* 0x08C */ u8 unk_08C[4];
+    /* 0x090 */ u64 unk_090;
+    /* 0x098 */ u8 unk_098[0x88];
+    /* 0x120 */ sceVu0FVECTOR unk_120; /* impulse, cleared every frame */
     /* 0x130 */ struct ActorUnk130* unk_130;
-    /* 0x134 */ u8 unk_134[0x18];
+    /* 0x134 */ struct ActorUnk134* unk_134;
+    /* 0x138 */ u8 unk_138[0x14];
     /* 0x14C */ struct ActorUnk14C* unk_14C;
     /* 0x150 */ f32 targetAngle;
-    /* 0x154 */ u8 unk_154[0x10];
+    /* 0x154 */ u8 unk_154[0xC];
+    /* 0x160 */ u32 unk_160;          /* read as a u64 together with motion */
     /* 0x164 */ s32 motion;           /* current motion (animation) */
     /* 0x168 */ u8 unk_168[0x10];
     /* 0x178 */ s32 unk_178;
     /* 0x17C */ u8 unk_17C[0x50];
     /* 0x1CC */ u32 unk_1CC;
-    /* 0x1D0 */ u8 unk_1D0[0x150];
+    /* 0x1D0 */ u8 unk_1D0[0x30];
+    /* 0x200 */ sceVu0FVECTOR unk_200; /* push from what the actor stands on */
+    /* 0x210 */ u8 unk_210[0x110];
     /* 0x320 */ sceVu0FVECTOR unk_320; /* saved position */
-    /* 0x330 */ u8 unk_330[0x40];
+    /* 0x330 */ u8 unk_330[0x20];
+    /* 0x350 */ u32 unk_350[4] __attribute__((aligned(16)));
+    /* 0x360 */ u8 unk_360[0x10];
     /* 0x370 */ u64 unk_370;           /* bit 50 follows D_002C5958.unk_0 */
     /* 0x378 */ u8 unk_378[0x20];
-    /* 0x398 */ s32 unk_398;
+    /* 0x398 */ struct Actor* unk_398; /* actor this one stands on */
     /* 0x39C */ u8 unk_39C[2];
     /* 0x39E */ u8 unk_39E;
-    /* 0x39F */ u8 unk_39F[0x11];
+    /* 0x39F */ u8 unk_39F[1];
+    /* 0x3A0 */ struct Actor* unk_3A0;
+    /* 0x3A4 */ u8 unk_3A4[0xC];
     /* 0x3B0 */ f32 unk_3B0;
     /* 0x3B4 */ u8 unk_3B4[0xC];
     /* 0x3C0 */ sceVu0FVECTOR unk_3C0; /* velocity used by the physics */
-    /* 0x3D0 */ u8 unk_3D0[0x70];
+    /* 0x3D0 */ u8 unk_3D0[4];
+    /* 0x3D4 */ f32 unk_3D4;           /* height above what is below */
+    /* 0x3D8 */ u8 unk_3D8[0x68];
     /* 0x440 */ u64 unk_440;           /* bit 33: the actor does not take move input */
+    /* 0x448 */ u8 unk_448[0x48];
+    /* 0x490 */ sceVu0FVECTOR unk_490; /* position at the start of the frame */
 };
 
 extern ActorState g_ActorStates[];

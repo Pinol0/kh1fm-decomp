@@ -57,6 +57,8 @@ segments:
       - [0x027500, asm]
       - [0x03E1F8, c, game/player]
       - [0x03F2C0, asm]
+      - [0x042388, c, game/actor_physics]
+      - [0x044350, asm]
       - [0x059F78, c, game/actor_ground]
       - [0x05A418, asm]
       # Linked libraries. Starts are certain where noted; other starts are the first function

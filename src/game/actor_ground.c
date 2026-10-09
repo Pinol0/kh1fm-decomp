@@ -12,7 +12,7 @@ s32 func_0013F510(Actor* actor, sceVu0FVECTOR move);
 s32 func_0015D770(Actor* actor, sceVu0FVECTOR move);
 s32 func_00144410(Actor* actor, sceVu0FVECTOR move);
 s32 func_0015DD50(Actor* actor, sceVu0FVECTOR move);
-void func_0014F658(Actor* actor, s32 arg1);
+s32 func_0014F658(Actor* actor, s32 arg1);
 void func_0015AC58(void);
 s32 func_0013DB30(void);
 void func_0014CB90(Actor* actor);

@@ -13,7 +13,7 @@ void func_001271B0(Actor* actor, sceVu0FVECTOR input);
 void func_00159978(Actor* actor, sceVu0FVECTOR input);
 void func_001707D0(Actor* actor, sceVu0FVECTOR input);
 void func_0013E558(Actor* actor, sceVu0FVECTOR move);
-s32 func_0014F600(s32 arg0);
+s32 func_0014F600(Actor* arg0);
 void func_0014CCE0(Actor* actor, f32 arg1);
 void func_00130340(Actor* actor, s32 motion, f32 blend);
 f32 func_001216D8(f32 angle, f32 target, f32 speed);
