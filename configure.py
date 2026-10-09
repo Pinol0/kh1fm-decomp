@@ -62,7 +62,11 @@ def fetch_compiler():
     CC_DIR.mkdir(parents=True, exist_ok=True)
     with urllib.request.urlopen(CC_URL) as response:
         with tarfile.open(fileobj=response, mode="r|xz") as archive:
-            archive.extractall(CC_DIR)
+            # "data" drops the archive's owners: run as root in a container, the files
+            # would otherwise belong to a foreign uid and could not be deleted later
+            archive.extractall(CC_DIR, filter="data")
+    for path in [CC_DIR, *CC_DIR.rglob("*")]:
+        path.chmod(path.stat().st_mode | stat.S_IWUSR)
 
 
 def fetch_objdiff():
