@@ -46,6 +46,22 @@ segments:
     vram: 0x00100000
     bss_size: 0x1E0F80
     subsegments:
-      - [0x000000, asm]
-      - [0x172C70, data]
+      # Sony runtime startup
+      - [0x000000, asm, sdk/crt0]
+      # Game code: one block until file boundaries are recovered
+      - [0x0001D8, asm, game/text]
+      # Linked libraries. Starts are certain where noted; other starts are the first function
+      # with library-specific evidence (error strings, syscalls, VU0 code), so a few functions
+      # of the previous library may still sit in the block before.
+      - [0x14F2E0, asm, sdk/libc]       # __assert; libc/libm/libgcc helpers up to libkernl
+      - [0x157D40, asm, sdk/libkernl]   # syscall stubs, after 0x30 bytes of padding (certain)
+      - [0x165608, asm, sdk/libgraph]   # sceGsDefDispEnv
+      - [0x166A10, asm, sdk/libdma]
+      - [0x1672F8, asm, sdk/libvu0]     # first VU0 macro-mode function
+      - [0x167FE0, asm, sdk/libdbc]     # libdbc, libpad2, libvib (link order from version strings)
+      - [0x1695F8, asm, sdk/libcdvd]
+      - [0x170B40, asm, sdk/libpc]      # performance counter (COP0)
+      - [0x170B60, asm, sdk/libmc]      # libmc, then libipu
+      # Data, rodata and small data of every object, not yet separated
+      - [0x172C70, data, data]
   - [0x394050]
