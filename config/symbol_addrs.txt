@@ -1,2 +1,20 @@
 // Visit https://github.com/ethteck/splat/wiki/Adding-Symbols for documentation about this file
 _start = 0x00100008; // type:func
+
+// libc (sdk/libc)
+sprintf = 0x00250EB0; // type:func
+strcat = 0x00250F40; // type:func
+strcpy = 0x002511B0; // type:func
+
+// game/area_name.c
+Area_GetWorldPrefix = 0x00112270; // type:func
+Area_MakeName = 0x00112298; // type:func
+Area_SetFileNames = 0x00112320; // type:func
+Area_SetBinImgName = 0x00112400; // type:func
+g_AreaWorld = 0x002BC128;
+g_AreaNumber = 0x002BC130;
+g_WorldPrefixes = 0x002BCC28; // size:0x54
+g_WorldDataName = 0x002BCCA0; // size:0x40
+g_AreaBinImgName = 0x002BCCE0; // size:0x40
+g_AreaBaseName = 0x002BCD20; // size:0x40
+g_AreaArchiveName = 0x002BCD60; // size:0x40

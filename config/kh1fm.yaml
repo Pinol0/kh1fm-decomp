@@ -50,6 +50,8 @@ segments:
       - [0x000000, asm, sdk/crt0]
       # Game code: one block until file boundaries are recovered
       - [0x0001D8, asm, game/text]
+      - [0x012270, c, game/area_name]
+      - [0x012498, asm]
       # Linked libraries. Starts are certain where noted; other starts are the first function
       # with library-specific evidence (error strings, syscalls, VU0 code), so a few functions
       # of the previous library may still sit in the block before.
