@@ -101,9 +101,9 @@ void Area_SetFileNames(void);
 /* Area change sequence: each step queues the next one through func_0011EF10 */
 void func_0011EF10(s32 arg0, void* callback);
 s32 func_001017E8(void);
-void func_0011CB08(u8* arg0);
+void func_0011CB08(char* arg0);
 s32 func_001559F0(s32 arg0, s32 arg1);
-void func_00120748(u8* arg0, s32 arg1, void* callback, s32 arg3);
+void func_00120748(char* arg0, s32 arg1, void* callback, s32 arg3);
 void func_0010E750(void);
 void func_0010B030(void* arg0);
 void* func_001137C8(void* arg0, s32 arg1);
@@ -121,6 +121,50 @@ void func_00112928(void);
 void func_00112B18(void);
 void func_00112FD0(s32 arg0);
 
+void func_00157668(void);
+void func_0011C7C0(s32 arg0, s32 arg1, s32 arg2);
+void func_0011D4E0(s32 arg0);
+void func_00101728(s32 arg0);
+void func_001C2EC8(s32 arg0, s32 arg1);
+void func_00110360(void);
+void func_0013C078(void);
+void func_00122198(void* arg0, void* callback);
+void func_00101680(void);
+s32 func_00113558(void);
+void func_00113688(void);
+s32 func_001136D8(void);
+void func_00113518(void);
+void func_00112498(void);
+
+/* Part of an actor (party member) used here */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x10];
+    /* 0x10 */ f32 posX;
+    /* 0x14 */ f32 posY;
+    /* 0x18 */ f32 posZ;
+    /* 0x1C */ u8 unk_1C[0x20];
+    /* 0x3C */ f32 rotY;
+} AreaActor;
+
+typedef struct {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+    /* 0xC */ f32 rotY;
+} AreaActorPlace; // size = 0x10
+
+extern AreaActor* D_002E26A0[3];
+extern AreaActorPlace D_004D92F0[3];
+extern s32 D_002BCDE4;
+extern s32 D_002BCDEC;
+extern void* D_002BCDF0;
+extern char g_AreaArchiveName[0x40];
+extern s32 D_004D934C;
+extern s32 D_004D9350;
+extern s32 D_004D9354;
+extern s32 D_004D9358;
+extern s32 D_004D935C;
+extern s32 D_004D9360;
 extern void* D_002A3F38;
 extern s32 D_002A3F40;
 extern s32 D_002B6474;
@@ -211,7 +255,7 @@ void func_00112820(void) {
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112840);
 
 void func_00112928(void) {
-    u8 buf[0x40];
+    char buf[0x40];
 
     func_0011CB08(buf);
     func_00120748(buf, func_001559F0(0x34, 4), func_00112840, 0);
@@ -279,7 +323,15 @@ s32 func_00112CF8(void) {
     return 4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112D28);
+void func_00112D28(void) {
+    func_00157668();
+    D_002A3F50.unk_04 = 0;
+    D_002A3F50.unk_00 = 0;
+    func_0011C7C0(0, 0, 360);
+    func_0011C7C0(1, 0, 360);
+    func_0011D4E0(360);
+    func_00101728(360);
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00112D80);
 
@@ -317,11 +369,41 @@ void func_00113028(void) {
     func_001559F0(0, 0x40);
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113048);
+void func_00113048(void) {
+    AreaActor* a;
+    s32 i;
 
+    for (i = 0; i < 3; i++) {
+        a = D_002E26A0[i];
+        if (a != NULL) {
+            D_004D92F0[i].x = a->posX;
+            D_004D92F0[i].y = a->posY;
+            D_004D92F0[i].z = a->posZ;
+            D_004D92F0[i].rotY = a->rotY;
+        }
+    }
+}
+
+// Copies the saved place of party member `index` to dest. Same instructions but the
+// address copies (move chain) differ; permuter best score 225 after 4 min.
+// void func_001130A0(s32 index, AreaActorPlace* dest) {
+//     dest->x = D_004D92F0[index].x;
+//     dest->y = D_004D92F0[index].y;
+//     dest->z = D_004D92F0[index].z;
+//     dest->rotY = D_004D92F0[index].rotY;
+// }
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001130A0);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_001130E0);
+s32 func_001130E0(void) {
+    s32 i;
+
+    for (i = 0; i < (s32)g_AreaEntranceCount; i++) {
+        if (g_AreaNumber == g_AreaEntrances[i].area) {
+            return i;
+        }
+    }
+    return 1000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00113138);
 
@@ -329,22 +411,57 @@ INCLUDE_ASM("asm/nonmatchings/game/area", func_00113270);
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001133A0);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_001134D8);
+void func_001134D8(s32 arg0) {
+    D_002BCDE4 = arg0;
+    if (arg0 != 0) {
+        D_002BCDEC = 0;
+        func_001C2EC8(arg0, 0);
+    } else {
+        func_00110360();
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113518);
+void func_00113518(void) {
+    if (D_002BCDD8 != 0 && D_002BCDDC == 0) {
+        func_0013C078();
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_00113558);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113688);
+void func_00113688(void) {
+    func_0011EF10(49900, func_00113558);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_001136A8);
+void func_001136A8(void) {
+    func_00113518();
+    func_00122198(D_002BCDF0, func_00113688);
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001136D8);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113768);
+s32 func_00113768(void) {
+    func_00112498();
+    func_00101680();
+    D_002BCDF0 = func_001137C8(D_002BCDF0, 0x80);
+    func_00120748(g_AreaArchiveName, (s32)D_002BCDF0, func_001136D8, 0);
+    do { return 4; } while (0); // TODO fake match
+}
 
+// Rounds addr up to a multiple of align. C version: the permuter could not match the
+// placement of mflo (5 min); kept as asm for now.
+// void* func_001137C8(void* addr, s32 align) {
+//     return ((s32)addr % align) ? (void*)((s32)addr / align * align + align) : addr;
+// }
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137C8);
 
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137F8);
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00113A00);
+void func_00113A00(void) {
+    D_004D934C = 0xCD;
+    D_004D9350 = 0x87;
+    D_004D9354 = 0x32;
+    D_004D9358 = 0x80;
+    D_004D935C = 0x4C;
+    D_004D9360 = 0x80;
+}

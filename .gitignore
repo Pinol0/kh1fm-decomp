@@ -16,3 +16,5 @@ nonmatchings/
 __pycache__/
 tools/cc/
 tools/objdiff-cli
+nonmatchings/
+permuter_settings.toml
