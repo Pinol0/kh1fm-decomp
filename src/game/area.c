@@ -2,6 +2,7 @@
  * Area management: per-area info table, loading state and related flags.
  */
 #include "common.h"
+#include "libc.h"
 
 typedef struct {
     /* 0x0 */ s32 unk_00;
@@ -107,7 +108,7 @@ extern s32 D_002E27A4;
 
 void Area_SetFileNames(void);
 /* Area change sequence: each step queues the next one through func_0011EF10 */
-void func_0011EF10(s32 arg0, void* callback);
+s32 func_0011EF10(s32 arg0, void* callback);
 s32 func_001017E8(void);
 void func_0011CB08(char* arg0);
 s32 func_001559F0(s32 arg0, s32 arg1);
@@ -136,7 +137,6 @@ void func_00101728(s32 arg0);
 void func_001C2EC8(s32 arg0, s32 arg1);
 void func_00110360(void);
 void func_0013C078(void);
-void func_00122198(void* arg0, void* callback);
 void func_00101680(void);
 s32 func_00113558(void);
 void func_00113688(void);
@@ -156,6 +156,47 @@ typedef struct {
 
 
 extern AreaActor* D_002E26A0[3];
+
+typedef struct {
+    /* 0x0 */ s32 world;
+    /* 0x4 */ s32 area;
+} AreaLocation;
+
+typedef struct {
+    /* 0x0 */ s32 world;
+    /* 0x4 */ s32 area;
+    /* 0x8 */ s32 entrance;
+} AreaLocationEntrance;
+
+extern AreaLocation D_002BC148;
+extern AreaLocationEntrance D_002BCDC8;
+typedef struct {
+    /* bit 0  */ u32 unk_0 : 13;
+    /* bit 13 */ u32 unk_13 : 1;
+    /* bit 14 */ u32 unk_14 : 5;
+    /* bit 19 */ u32 unk_19 : 1;
+    /* bit 20 */ u32 unk_20 : 12;
+} GameFlags;
+
+extern GameFlags D_002C5958;
+extern s32 D_002BC13C; /* id of the .bin/.img data currently loaded */
+extern s32 D_002BCDBC;
+extern void* D_002A3F3C;
+extern s32 D_002BCDE8;
+extern s32 D_002C1388;
+extern char g_AreaBinImgName[0x40];
+extern char D_0048D008[]; /* ".img" */
+void Area_SetBinImgName(s32 index);
+void func_0012CAC8(s32 arg0, s32 arg1);
+void func_00112D28(void);
+void func_00113048(void);
+s32 func_00112CF8(void);
+void func_00112C08(s32 arg0);
+void func_0013C6D8(void);
+s32 func_001148C8(void);
+s32 func_0011E9A8(void* callback, s32 arg1);
+s32 func_001136A8(void);
+s32 func_00122198(void* arg0, void* callback);
 extern s32 D_002BBE1C;
 void func_00104FD0(s32 member, f32* dest);
 void func_00111590(s32 member, f32* dest);
@@ -321,7 +362,24 @@ void func_00112C08(s32 arg0) {
     D_002BCDC0 = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112C20);
+/* Starts loading the .bin/.img data of the area behind an entrance, unless already loaded */
+void func_00112C20(s32 entrance) {
+    char name[0x40];
+    s32 id;
+
+    if (D_002C5958.unk_13 != 1) {
+        id = g_AreaInfos[g_AreaEntrances[entrance].area].unk_00;
+        if (D_002BC13C != id) {
+            D_002BCDBC = 1;
+            Area_SetBinImgName(id);
+            strcpy(name, g_AreaBinImgName);
+            strcat(name, D_0048D008);
+            D_002A3F3C = (void*)func_001559F0(0x34, 8);
+            D_002A3F3C = func_001137C8(D_002A3F3C, 0x80);
+            func_00120748(name, (s32)D_002A3F3C, func_00112C08, 0);
+        }
+    }
+}
 
 s32 func_00112CF8(void) {
     func_0011C898(0);
@@ -340,9 +398,29 @@ void func_00112D28(void) {
     func_00101728(360);
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112D80);
+void func_00112D80(void) {
+    func_0012CAC8(2, 0);
+    func_0012CAC8(6, 0);
+    D_002C5958.unk_19 = 1;
+    func_00112D28();
+    func_001C1F60();
+    func_0011EF10(0x2E630, func_00112CF8);
+    D_002BC148.world = g_AreaWorld;
+    D_002BC148.area = g_AreaNumber;
+    func_00109558(4);
+}
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_00112E08);
+void func_00112E08(void) {
+    D_002C5958.unk_19 = 1;
+    func_00112D28();
+    func_001C1F60();
+    func_00113048();
+    func_0011EF10(0x2E630, func_00112CF8);
+    D_002BCDC8.world = g_AreaWorld;
+    D_002BCDC8.area = g_AreaNumber;
+    D_002BCDC8.entrance = g_AreaEntranceIndex;
+    func_00109558(6);
+}
 
 void func_00112E90(void) {
 }
@@ -524,12 +602,22 @@ void func_00113688(void) {
     func_0011EF10(49900, func_00113558);
 }
 
-void func_001136A8(void) {
+s32 func_001136A8(void) {
     func_00113518();
-    func_00122198(D_002BCDF0, func_00113688);
+    return func_00122198(D_002BCDF0, func_00113688);
 }
 
-INCLUDE_ASM("asm/nonmatchings/game/area", func_001136D8);
+s32 func_001136D8(void) {
+    if (D_002B6474 == 1) {
+        func_0013C6D8();
+    }
+    func_001148C8();
+    if (D_002BCDE8 == 0) {
+        D_002C1388 = 1;
+        return func_0011E9A8(func_001136A8, func_001559F0(0x34, 4));
+    }
+    return func_001136A8();
+}
 
 s32 func_00113768(void) {
     func_00112498();
