@@ -14,7 +14,9 @@ typedef struct {
 } ActorParams;
 
 struct ActorUnk130 {
-    /* 0x00 */ u8 unk_00[0x54];
+    /* 0x00 */ u8 unk_00[0x4C];
+    /* 0x4C */ u16 unk_4C;
+    /* 0x4E */ u8 unk_4E[6];
     /* 0x54 */ s8 unk_54; /* 0: input comes from func_001271B0 */
 };
 
@@ -32,6 +34,19 @@ struct ActorUnk14C {
     /* 0x00 */ u8 unk_00[0x2C];
     /* 0x2C */ struct ActorUnk14C_2C* unk_2C;
 };
+
+/* Collision body of an actor (Actor.body) */
+typedef struct {
+    /* 0x00 */ sceVu0FVECTOR pos;
+    /* 0x10 */ sceVu0FVECTOR vel;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ u8 unk_24[8];
+    /* 0x2C */ s32 platform; /* index into the platform table, -1 if none */
+    /* 0x30 */ u32 flags;
+    /* 0x34 */ f32 unk_34;
+    /* 0x38 */ u16 surface;  /* surface type below, 0 if none */
+    /* 0x3A */ u8 unk_3A[6];
+} ActorBody; // size = 0x40
 
 typedef struct Actor Actor;
 typedef void (*ActorStateFunc)(Actor* actor, sceVu0FVECTOR move);
@@ -61,7 +76,9 @@ struct Actor {
     /* 0x088 */ u32 unk_088;
     /* 0x08C */ u8 unk_08C[4];
     /* 0x090 */ u64 unk_090;
-    /* 0x098 */ u8 unk_098[0x88];
+    /* 0x098 */ u8 unk_098[0x28];
+    /* 0x0C0 */ sceVu0FVECTOR unk_0C0; /* normalized ground normal */
+    /* 0x0D0 */ u8 unk_0D0[0x50];
     /* 0x120 */ sceVu0FVECTOR unk_120; /* impulse, cleared every frame */
     /* 0x130 */ struct ActorUnk130* unk_130;
     /* 0x134 */ struct ActorUnk134* unk_134;
@@ -77,9 +94,12 @@ struct Actor {
     /* 0x1CC */ u32 unk_1CC;
     /* 0x1D0 */ u8 unk_1D0[0x30];
     /* 0x200 */ sceVu0FVECTOR unk_200; /* push from what the actor stands on */
-    /* 0x210 */ u8 unk_210[0x110];
+    /* 0x210 */ u8 unk_210[0x90];
+    /* 0x2A0 */ ActorBody body;
+    /* 0x2E0 */ u8 unk_2E0[0x40];
     /* 0x320 */ sceVu0FVECTOR unk_320; /* saved position */
-    /* 0x330 */ u8 unk_330[0x20];
+    /* 0x330 */ u8 unk_330[0x10];
+    /* 0x340 */ sceVu0FVECTOR unk_340; /* ground normal */
     /* 0x350 */ u32 unk_350[4] __attribute__((aligned(16)));
     /* 0x360 */ u8 unk_360[0x10];
     /* 0x370 */ u64 unk_370;           /* bit 50 follows D_002C5958.unk_0 */
@@ -97,8 +117,11 @@ struct Actor {
     /* 0x3D4 */ f32 unk_3D4;           /* height above what is below */
     /* 0x3D8 */ u8 unk_3D8[0x68];
     /* 0x440 */ u64 unk_440;           /* bit 33: the actor does not take move input */
-    /* 0x448 */ u8 unk_448[0x48];
+    /* 0x448 */ s32 unk_448;           /* last surface stood on */
+    /* 0x44C */ u8 unk_44C[0x44];
     /* 0x490 */ sceVu0FVECTOR unk_490; /* position at the start of the frame */
+    /* 0x4A0 */ u8 unk_4A0[0xC];
+    /* 0x4AC */ f32 unk_4AC;           /* previous collision step */
 };
 
 extern ActorState g_ActorStates[];

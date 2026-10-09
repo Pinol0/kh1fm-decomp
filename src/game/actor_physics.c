@@ -19,6 +19,22 @@ void func_0014CC88(Actor* actor, f32 arg1);
 void func_00121FC4(sceVu0FVECTOR out, sceVu0FVECTOR v); /* direction in xyz, length in w */
 extern sceVu0FVECTOR D_002C58B0; /* zero */
 extern f32 D_002C5970;
+f32 func_001427D0(Actor* actor, ActorBody* body);
+Actor* func_0015C738(Actor* actor, sceVu0FVECTOR move);
+void func_00137440(Actor* actor, Actor* platform);
+void func_00143818(Actor* actor, sceVu0FVECTOR move, s32 arg2);
+void func_00143180(Actor* actor, sceVu0FVECTOR move);
+void func_00151B98(Actor* actor, sceVu0FVECTOR move);
+void func_001337E0(s32 arg0, Actor* actor, s32 surface);
+void func_00117710(ActorBody* body, sceVu0FVECTOR arg1);
+extern Actor* D_002E26A0[3]; /* party: 0 = Sora */
+
+typedef struct {
+    /* 0x0 */ Actor* actor;
+    /* 0x4 */ u8 unk_4[0xC];
+} Platform; // size = 0x10
+
+extern Platform D_003044E0[];
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142388);
 
@@ -56,7 +72,83 @@ INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143660);
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143818);
 
+#ifdef NON_MATCHING
+// Equivalent; two instructions short (register use around the surface tracking).
+/*
+ * Moves an actor with collision: the move is split into steps no longer than the
+ * collision step size (at most 4), each one resolved against the map.
+ */
+void func_00143A70(Actor* actor, sceVu0FVECTOR move, s32 arg2) {
+    sceVu0FVECTOR dir;
+    f32 size;
+    f32 step;
+    u32 flags;
+    u16 surface;
+    Actor* platform;
+    s32 i;
+
+    size = func_001427D0(actor, &actor->body);
+    step = (size < actor->unk_4AC) ? size : actor->unk_4AC;
+    actor->unk_4AC = size;
+    if (actor->unk_398 != NULL) {
+        actor->unk_370 &= ~((u64)1 << 53);
+    }
+    func_00137440(actor, func_0015C738(actor, move));
+    func_00143818(actor, move, arg2);
+    func_00121FC4(dir, move);
+    if (dir[3] / step > 4.0f) {
+        dir[3] = step * 4.0f;
+    }
+    surface = 0;
+    flags = 1;
+    do {
+        if (step < dir[3]) {
+            sceVu0ScaleVector(move, dir, step);
+            dir[3] -= step;
+        } else {
+            sceVu0ScaleVector(move, dir, dir[3]);
+            dir[3] = 0.0f;
+        }
+        func_001427D0(actor, &actor->body);
+        func_00143180(actor, move);
+        flags = (flags | (actor->body.flags & ~1)) & ((actor->body.flags & 1) | ~1);
+        if (actor->unk_130->unk_4C == 0xC9) {
+            func_00151B98(actor, move);
+        }
+        sceVu0AddVector(actor->pos, actor->pos, move);
+        if (actor->body.surface != 0 && actor->body.surface != surface) {
+            if (actor->body.flags & 4) {
+                func_001337E0(-2, actor, actor->body.surface);
+                surface = actor->body.surface;
+            } else if (actor == D_002E26A0[0]) {
+                func_001337E0(-2, actor, actor->body.surface);
+                surface = actor->body.surface;
+            } else {
+                surface = actor->body.surface;
+            }
+        }
+        actor->unk_448 = actor->body.surface;
+    } while (dir[3] > 0.0f);
+    actor->body.flags = flags;
+    func_00117710(&actor->body, actor->unk_320);
+    sceVu0Normalize(actor->unk_0C0, actor->unk_340);
+    actor->unk_0C0[3] = 1.0f;
+    platform = actor->unk_398;
+    if (actor->body.platform != -1) {
+        platform = D_003044E0[actor->body.platform].actor;
+        if (!(actor->body.flags & 1)) {
+            func_00137440(actor, platform);
+        }
+    }
+    if (platform != NULL) {
+        for (i = 0; i < 4; i++) {
+            actor->unk_350[i] = platform->unk_350[i];
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143A70);
+#endif
 
 #ifdef NON_MATCHING
 // Equivalent; the original reloads unk_3A0 inside the copy loop.
