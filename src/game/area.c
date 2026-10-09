@@ -157,6 +157,15 @@ typedef struct {
 
 
 extern AreaActor* D_002E26A0[3];
+void func_001104E0(void);
+void func_0010F580(void);
+void func_0010F5D0(void);
+void func_00106B18(void* arg0);
+char* func_001EFC10(s32 id);
+void func_001F1ED8(u32 color, s32 x, s32 y, char* text, s32 size);
+void func_00265BC0(s32 mode, s32 timeout); /* libgraph: waits for the GS DMA paths */
+extern u64 D_002BCE00[];
+extern u8 D_002BD100[];
 s32 func_00105860(void);
 void func_0017F678(void);
 void func_00132550(void);
@@ -771,7 +780,60 @@ void* func_001137C8(void* addr, s32 align) {
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137C8);
 #endif
 
+/* Draws the screen shown while an area loads: GS packet colors, five lines of text and
+ * the display registers */
+#ifdef NON_MATCHING
+// Equivalent; the initial loads of the color and GS values are scheduled differently.
+void func_001137F8(void) {
+    u64 a;
+    u64 b;
+    u32 color;
+
+    b = ((u64)D_004D935C << 24) | 0x100000000;
+    color = D_004D934C | (D_004D9350 << 8) | (D_004D9354 << 16) | (D_004D9358 << 24);
+    a = ((u64)D_004D9360 << 24) | 0x100D17A88;
+
+    D_002BCE00[40] = a;
+    D_002BCE00[44] = a;
+    D_002BCE00[48] = a;
+    D_002BCE00[50] = a;
+    D_002BCE00[52] = a;
+    D_002BCE00[54] = a;
+    D_002BCE00[58] = a;
+    D_002BCE00[62] = a;
+    D_002BCE00[70] = a;
+    D_002BCE00[74] = a;
+    D_002BCE00[78] = a;
+    D_002BCE00[80] = a;
+    D_002BCE00[82] = a;
+    D_002BCE00[84] = a;
+    D_002BCE00[88] = a;
+    D_002BCE00[92] = a;
+    D_002BCE00[10] = b;
+    D_002BCE00[14] = b;
+    D_002BCE00[18] = b;
+    D_002BCE00[20] = b;
+    D_002BCE00[22] = b;
+    D_002BCE00[24] = b;
+    D_002BCE00[28] = b;
+    D_002BCE00[32] = b;
+    func_001104E0();
+    func_0010F580();
+    func_00106B18(D_002BD100);
+    func_001F1ED8(color, 182, 54, func_001EFC10(5), 18);
+    func_001F1ED8(color, 214, 54, func_001EFC10(6), 18);
+    func_001F1ED8(color, 246, 54, func_001EFC10(7), 18);
+    func_001F1ED8(color, 278, 54, func_001EFC10(8), 18);
+    func_001F1ED8(color, 310, 54, func_001EFC10(9), 18);
+    func_0010F5D0();
+    func_00265BC0(0, 0);
+    *(volatile u64*)0x12000000 = 0xFF03;          /* GS PMODE */
+    *(volatile u64*)0x12000070 = 0x11B0;          /* GS DISPFB2 */
+    *(volatile u64*)0x12000080 = 0x7F9FF020D227C; /* GS DISPLAY2 */
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/area", func_001137F8);
+#endif
 
 void func_00113A00(void) {
     D_004D934C = 0xCD;
