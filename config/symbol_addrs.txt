@@ -29,3 +29,27 @@ g_AreaEntrances = 0x002BCDA0;
 g_AreaEntranceCount = 0x002BCDA4;
 g_AreaEntranceIndex = 0x002BCDA8;
 g_WorldDataBuffer = 0x009A0000;
+
+// libvu0 (sdk/libvu0), identified from their VU0 instructions
+sceVu0ApplyMatrix = 0x002672F8; // type:func
+sceVu0MulMatrix = 0x00267328; // type:func
+sceVu0OuterProduct = 0x00267370; // type:func
+sceVu0InnerProduct = 0x00267390; // type:func
+sceVu0Normalize = 0x002673B8; // type:func
+sceVu0DivVector = 0x002674B0; // type:func
+sceVu0DivVectorXYZ = 0x002674D0; // type:func
+sceVu0InterVector = 0x002674F0; // type:func
+sceVu0AddVector = 0x00267518; // type:func
+sceVu0SubVector = 0x00267530; // type:func
+sceVu0MulVector = 0x00267548; // type:func
+sceVu0ScaleVector = 0x00267560; // type:func
+sceVu0TransMatrix = 0x00267578; // type:func
+sceVu0CopyVector = 0x002675A8; // type:func
+sceVu0CopyMatrix = 0x002675B8; // type:func
+sceVu0FTOI4Vector = 0x002675E0; // type:func
+sceVu0FTOI0Vector = 0x002675F0; // type:func
+sceVu0ITOF4Vector = 0x00267600; // type:func
+sceVu0ITOF0Vector = 0x00267610; // type:func
+sceVu0UnitMatrix = 0x00267620; // type:func
+sceVu0ClampVector = 0x00267908; // type:func
+sceVu0ScaleVectorXYZ = 0x00267E90; // type:func

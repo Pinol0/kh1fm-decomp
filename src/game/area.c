@@ -3,6 +3,7 @@
  */
 #include "common.h"
 #include "libc.h"
+#include "game.h"
 
 typedef struct {
     /* 0x0 */ s32 unk_00;
@@ -70,16 +71,6 @@ typedef struct {
 
 extern s32 g_AreaWorld;
 extern s32 g_AreaNumber;
-typedef struct {
-    /* bit 0 */ u32 unk_0 : 2;
-    /* bit 2 */ u32 unk_2 : 1;
-    /* bit 3 */ u32 unk_3 : 1;
-    /* bit 4 */ u32 unk_4 : 1;
-    /* bit 5 */ u32 unk_5 : 1;
-    /* bit 6 */ u32 unk_6 : 26;
-} SystemFlags;
-
-extern SystemFlags g_SystemFlags;
 extern s32 D_002BCC98;
 extern AreaInfo* g_AreaInfos;
 
@@ -210,19 +201,6 @@ typedef struct {
 
 extern AreaLocation D_002BC148;
 extern AreaLocationEntrance D_002BCDC8;
-typedef struct {
-    /* bit 0  */ u32 unk_0 : 2;
-    /* bit 2  */ u32 unk_2 : 1;
-    /* bit 3  */ u32 unk_3 : 10;
-    /* bit 13 */ u32 unk_13 : 1;
-    /* bit 14 */ u32 unk_14 : 5;
-    /* bit 19 */ u32 unk_19 : 1;
-    /* bit 20 */ u32 unk_20 : 7;
-    /* bit 27 */ u32 unk_27 : 1;
-    /* bit 28 */ u32 unk_28 : 4;
-} GameFlags;
-
-extern GameFlags D_002C5958;
 extern s32 D_002BC13C; /* id of the .bin/.img data currently loaded */
 extern s32 D_002BCDBC;
 extern void* D_002A3F3C;
