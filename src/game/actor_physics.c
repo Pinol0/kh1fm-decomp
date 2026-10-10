@@ -24,6 +24,13 @@ Actor* func_0015C738(Actor* actor, sceVu0FVECTOR move);
 void func_00137440(Actor* actor, Actor* platform);
 void func_00143818(Actor* actor, sceVu0FVECTOR move, s32 arg2);
 void func_00143180(Actor* actor, sceVu0FVECTOR move);
+u64 func_001166E8(sceVu0FVECTOR pos); /* bit i: overlapping platform i - 1 (bit 0: the map) */
+void func_00142FE0(Actor* actor, Actor* other);
+s32 func_00143080(Actor* actor, sceVu0FVECTOR move);
+void func_0014D070(Actor* actor, sceVu0FVECTOR move);
+f32 func_00121748(sceVu0FVECTOR a, sceVu0FVECTOR b);
+f32 func_00120BF8(sceVu0FVECTOR v);
+extern sceVu0FVECTOR D_002C58A0; /* zero */
 void func_00151B98(Actor* actor, sceVu0FVECTOR move);
 void func_001337E0(s32 arg0, Actor* actor, s32 surface);
 void func_00117710(ActorBody* body, sceVu0FVECTOR arg1);
@@ -35,6 +42,13 @@ typedef struct {
 } Platform; // size = 0x10
 
 extern Platform D_003044E0[];
+
+typedef struct {
+    /* 0x0 */ u8 unk_0[8];
+    /* 0x8 */ Platform entries[1]; /* = D_003044E0 */
+} PlatformTable;
+
+extern PlatformTable D_003044D8;
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142388);
 
@@ -66,7 +80,109 @@ INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142FE0);
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143080);
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143180);
+/*
+ * Resolves one collision step: tries the move from the current body position, then applies
+ * the per-state limits (states 10 and 18 refuse horizontal moves that the collision blocked)
+ * and turns the result back into the move that is really made.
+ */
+void func_00143180(Actor* actor, sceVu0FVECTOR move) {
+    sceVu0FVECTOR delta;
+    ActorBody saved;
+    ActorBody test;
+    u32 flags;
+    s32 count;
+    s32 i;
+    Platform* platform;
+
+    if ((actor->unk_130->unk_04 & 0x2000) && ((u32)(actor->unk_370 >> 53) & 1) && actor->unk_398 == NULL
+        && move[0] == 0.0f && move[1] == 0.0f && move[2] == 0.0f) {
+        return;
+    }
+    flags = actor->body.flags;
+    while (1) {
+        sceVu0CopyVector(actor->body.vel, move);
+        actor->body.vel[3] = 1.0f;
+        saved = actor->body;
+        sceVu0CopyVector(saved.target, actor->body.pos);
+        if (actor->flags & 0x100) {
+            if (func_00143080(actor, move) == 0) {
+                actor->body = saved;
+                sceVu0CopyVector(actor->body.target, actor->body.pos);
+            }
+        } else {
+            count = 0;
+            actor->unk_090 = func_001166E8(actor->body.pos);
+            platform = (Platform*)((u8*)&D_003044D8 - 8); // TODO fake match: &D_003044D8.entries[-1] folds the -8
+            for (i = 0; i < 32; i++, platform++) {
+                if ((s32)((actor->unk_090 >> i) & 1)) {
+                    if (i > 0) {
+                        func_00142FE0(actor, platform->actor);
+                        if ((u32)(platform->actor->unk_370 >> 57) & 1) {
+                            count++;
+                        }
+                    } else {
+                        count++;
+                    }
+                }
+            }
+            if (count >= 2) {
+                test = actor->body;
+                sceVu0CopyVector(test.pos, test.target);
+                sceVu0CopyVector(test.vel, D_002C58A0);
+                if (func_001166E8(test.pos) != 0) {
+                    actor->body = saved;
+                    actor->body.unk_28 |= 0x80000000;
+                }
+            }
+        }
+        switch (actor->state) {
+        case 2:
+        case 3:
+            func_0014D070(actor, move);
+            break;
+        case 10:
+            sceVu0SubVector(actor->body.vel, actor->body.target, actor->body.pos);
+            if (move[0] != 0.0f || move[2] != 0.0f) {
+                if (actor->body.unk_3E == 0xFFFF || func_00121748(actor->body.vel, move) < 1.0f) {
+                    move[2] = 0.0f;
+                    move[0] = 0.0f;
+                    continue;
+                }
+            } else if (actor->body.unk_3E == 0xFFFF) {
+                sceVu0CopyVector(move, D_002C58A0);
+                sceVu0CopyVector(actor->body.target, actor->body.pos);
+                actor->body.unk_3E = 0;
+            }
+            break;
+        case 15:
+            sceVu0SubVector(delta, actor->body.target, actor->body.pos);
+            if (func_00120BF8(delta) > 15.0f) {
+                actor->unk_148->unk_90 = 0xFFFF;
+            }
+            sceVu0CopyVector(actor->body.target, actor->body.pos);
+            break;
+        case 18:
+            if (actor->body.unk_6E == 0xFFFF) {
+                if (actor->body.flags & 0x20) {
+                    actor->body.unk_6E = 0;
+                } else if (!(flags & 0x20)) {
+                    if (move[0] == 0.0f && move[2] == 0.0f) {
+                        sceVu0CopyVector(actor->body.target, actor->body.pos);
+                        actor->body.unk_6E = 0;
+                    } else {
+                        move[0] = move[2] = 0.0f;
+                        continue;
+                    }
+                }
+            }
+            break;
+        }
+        break;
+    }
+    sceVu0SubVector(move, actor->body.target, actor->body.pos);
+    actor->unk_370 |= (u64)0x8000 << 38; /* bit 53 */
+    actor->unk_370 |= (u64)0x8000 << 41; /* bit 56 */
+}
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143660);
 

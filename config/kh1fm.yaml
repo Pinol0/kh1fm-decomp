@@ -76,4 +76,6 @@ segments:
       - [0x170B60, asm, sdk/libmc]      # libmc, then libipu
       # Data, rodata and small data of every object, not yet separated
       - [0x172C70, data, data]
+      - [0x38E210, .rodata, game/actor_physics]
+      - [0x38E2E0, rodata, data_38E2E0]   # rest of the blob, as rodata so it links after the .rodata above
   - [0x394050]

@@ -14,7 +14,9 @@ typedef struct {
 } ActorParams;
 
 struct ActorUnk130 {
-    /* 0x00 */ u8 unk_00[0x4C];
+    /* 0x00 */ u8 unk_00[4];
+    /* 0x04 */ u32 unk_04;
+    /* 0x08 */ u8 unk_08[0x44];
     /* 0x4C */ u16 unk_4C;
     /* 0x4E */ u8 unk_4E[6];
     /* 0x54 */ s8 unk_54; /* 0: input comes from func_001271B0 */
@@ -23,6 +25,11 @@ struct ActorUnk130 {
 struct ActorUnk134 {
     /* 0x00 */ u8 unk_00[0x14];
     /* 0x14 */ s32 unk_14;
+};
+
+struct ActorUnk148 {
+    /* 0x00 */ u8 unk_00[0x90];
+    /* 0x90 */ s32 unk_90;
 };
 
 struct ActorUnk14C_2C {
@@ -40,13 +47,19 @@ typedef struct {
     /* 0x00 */ sceVu0FVECTOR pos;
     /* 0x10 */ sceVu0FVECTOR vel;
     /* 0x20 */ f32 radius;
-    /* 0x24 */ u8 unk_24[8];
+    /* 0x24 */ u8 unk_24[4];
+    /* 0x28 */ u32 unk_28;   /* bit 31: stuck between actors, move undone */
     /* 0x2C */ s32 platform; /* index into the platform table, -1 if none */
     /* 0x30 */ u32 flags;
     /* 0x34 */ f32 unk_34;
     /* 0x38 */ u16 surface;  /* surface type below, 0 if none */
-    /* 0x3A */ u8 unk_3A[6];
-} ActorBody; // size = 0x40
+    /* 0x3A */ u8 unk_3A[4];
+    /* 0x3E */ u16 unk_3E;   /* 0xFFFF: blocked (state 10) */
+    /* 0x40 */ sceVu0FVECTOR target; /* where the move ends after collision */
+    /* 0x50 */ u8 unk_50[0x1E];
+    /* 0x6E */ u16 unk_6E;   /* 0xFFFF: blocked (state 18) */
+    /* 0x70 */ u8 unk_70[0x10];
+} ActorBody; // size = 0x80
 
 typedef struct Actor Actor;
 typedef void (*ActorStateFunc)(Actor* actor, sceVu0FVECTOR move);
@@ -82,7 +95,8 @@ struct Actor {
     /* 0x120 */ sceVu0FVECTOR unk_120; /* impulse, cleared every frame */
     /* 0x130 */ struct ActorUnk130* unk_130;
     /* 0x134 */ struct ActorUnk134* unk_134;
-    /* 0x138 */ u8 unk_138[0x14];
+    /* 0x138 */ u8 unk_138[0x10];
+    /* 0x148 */ struct ActorUnk148* unk_148;
     /* 0x14C */ struct ActorUnk14C* unk_14C;
     /* 0x150 */ f32 targetAngle;
     /* 0x154 */ u8 unk_154[0xC];
@@ -96,7 +110,6 @@ struct Actor {
     /* 0x200 */ sceVu0FVECTOR unk_200; /* push from what the actor stands on */
     /* 0x210 */ u8 unk_210[0x90];
     /* 0x2A0 */ ActorBody body;
-    /* 0x2E0 */ u8 unk_2E0[0x40];
     /* 0x320 */ sceVu0FVECTOR unk_320; /* saved position */
     /* 0x330 */ u8 unk_330[0x10];
     /* 0x340 */ sceVu0FVECTOR unk_340; /* ground normal */

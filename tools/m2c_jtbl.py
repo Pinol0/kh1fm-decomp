@@ -17,6 +17,7 @@ tables = ""
 for jt in sorted(set(re.findall(r"jtbl_[0-9A-F]{8}", body))):
     m = re.search(rf"^(?:dlabel|jlabel|glabel) {jt}\n.*?(?=^(?:dlabel|glabel|jlabel) |\Z)", data, re.M | re.S)
     tables += m.group(0) + "\n"
+tables = re.sub(r"^.*\.word 0x00000000\n", "", tables, flags=re.M)  # alignment padding
 targets = set(re.findall(r"\.word 0x00([0-9A-F]{6})", tables))
 tables = re.sub(r"\.word 0x00([0-9A-F]{6})", r".word .L00\1", tables)
 for t in targets:

@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import stat
 import shutil
 import subprocess
@@ -121,7 +122,9 @@ def write_ninja(entries):
         srcs = [str(s) for s in entry.src_paths]
         unit = {"name": seg.name, "metadata": {"progress_categories": [category(seg.name)]}}
         if isinstance(seg, seg_c.CommonSegC):
-            ninja.build(obj, "cc", srcs)
+            # the INCLUDE_ASM files are not seen by cpp -MM
+            included = sorted(str(p) for p in (Path("asm/nonmatchings") / seg.name).glob("*.s"))
+            ninja.build(obj, "cc", srcs, implicit=included)
             # objdiff target: splat's full disassembly of the same unit
             target = str(Path("expected") / f"{seg.name}.o")
             ninja.build(target, "as", str(seg.asm_out_path()))
@@ -167,6 +170,16 @@ def write_objdiff(units):
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n")
 
 
+def align_jump_tables():
+    """ee-gcc aligns every jump table to 16 bytes (.align 4); splat writes .align 3 for rodata
+    migrated into function files, which shifts the tables that follow a compiled one."""
+    for path in Path("asm/nonmatchings").rglob("*.s"):
+        text = path.read_text()
+        fixed = re.sub(r"^\.section \.rodata\n\.align 3\n(?=nonmatching jtbl_)", ".section .rodata\n.align 4\n", text, flags=re.M)
+        if fixed != text:
+            path.write_text(fixed)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-c", "--clean", action="store_true", help="remove generated files first")
@@ -178,6 +191,7 @@ def main():
     fetch_compiler()
     fetch_objdiff()
     split.main([YAML], modes="all", verbose=False, use_cache=False, make_full_disasm_for_code=True)
+    align_jump_tables()
     write_objdiff(write_ninja(split.linker_writer.entries))
 
 
