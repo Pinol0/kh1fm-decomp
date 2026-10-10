@@ -92,6 +92,25 @@ A VIF packet is a series of batches, each drawn by the VU1 program on `MSCNT`:
 | UNPACK V4-32 @ 1 | position x, y, z, w; w = 0: no triangle, w != 0: closes a strip triangle (sign = winding) |
 | UNPACK V4-8 (unsigned) @ 2 | colour RGBA (0x80 = 1.0): baked lighting |
 | UNPACK V2-16 @ 3 | texture coordinates, 4096 = 1.0 |
-| DIRECT, 3 qw | GS registers for the batch (texture) |
+| DIRECT, 3 qw | GIF A+D tag, `TEX0_2`, `CLAMP_2` of the batch |
 
-Not decoded yet: the textures (probably the `.img`, entries 3/4 and the DIRECT packets).
+`TEX0_2` points into the textures the `.img` uploaded (below); `CLAMP_2` is either REGION_CLAMP
+(MINU/MAXU/MINV/MAXV = a sub-rectangle of an atlas page) or REGION_REPEAT (UMSK = tile size - 1,
+UFIX = tile origin). `tools/map2obj.py --img` exports one material per TEX0/CLAMP pair.
+
+## Textures (`<area>.img`)
+
+Loaded after the `.bin` (`func_001012E0`) and uploaded to GS memory by `func_00101048`. Header of
+u32 offset/size pairs:
+
+| Offset | Data |
+|---|---|
+| 0x00 / 0x04 | records of 0xA0 bytes, copied to `D_0029B420` (none in tw00_01) |
+| 0x08 | 16 page formats (u8: 0x13 PSMT8, 0x14 PSMT4); +0x14 u16 count of 16-colour CLUTs, +0x16 u16 end of the 256-colour CLUTs; then fog / scene parameters (`func_00100B18`) |
+| 0x10 / 0x14 | CLUTs, 0x100 bytes (one GS block) each, at CBP 0x3E00 + index: 16 colours as 8x2 PSMCT32, then 256 colours as 16x16 PSMCT32 every 4 blocks |
+| 0x18 / 0x1C | 16 texture pages of 0x10000 bytes at TBP 0x2600 + 0x100 * page (PSMT4 512x256, TBW 8 or PSMT8 256x256, TBW 4), then 0x40000 bytes of PSMT8H 256x1024 at TBP 0 (the upper byte of the 24-bit frame buffer: four 256x256 textures) |
+| 0x20 / 0x24 | records of 2064 bytes (`func_00100F70`) |
+
+Textures are read back with the same PSM and width they were uploaded with, so the file data is
+linear; only the 256-colour CLUTs need the usual CSM1 reordering (index bits 3 and 4 swapped).
+Colour and alpha components are 0..0x80. `tools/areaimg.py` decodes them.
