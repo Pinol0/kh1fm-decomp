@@ -24,6 +24,13 @@ Actor* func_0015C738(Actor* actor, sceVu0FVECTOR move);
 void func_00137440(Actor* actor, Actor* platform);
 void func_00143818(Actor* actor, sceVu0FVECTOR move, s32 arg2);
 void func_00143180(Actor* actor, sceVu0FVECTOR move);
+void func_0014F798(Actor* actor, sceVu0FVECTOR delta);
+void func_001568E8(Actor* actor, sceVu0FVECTOR out);
+void func_001564E0(Actor* actor, sceVu0FVECTOR delta);
+s32 func_0014F5C8(void);
+s32 func_0014F600(Actor* actor);
+void func_0012C698(Actor* actor);
+s32 func_001443A8(Actor* actor);
 u64 func_001166E8(sceVu0FVECTOR pos); /* bit i: overlapping platform i - 1 (bit 0: the map) */
 void func_00142FE0(Actor* actor, Actor* other);
 s32 func_00143080(Actor* actor, sceVu0FVECTOR move);
@@ -305,9 +312,98 @@ void func_00143D20(Actor* actor, sceVu0FVECTOR move, s32 arg2) {
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143D20);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00143EB8);
+/* The move an actor makes this frame: from its state, plus the pushes it is subject to. */
+void func_00143EB8(Actor* actor, sceVu0FVECTOR delta) {
+    sceVu0FVECTOR extra;
+    ActorStateFunc move;
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00144060);
+    switch (actor->state) {
+    case 9:
+    case 10:
+    case 22:
+    case 23:
+        sceVu0ScaleVectorXYZ(delta, actor->move, actor->move[3] * D_002BBDFC);
+        break;
+    case 18:
+        sceVu0ScaleVectorXYZ(delta, actor->move, D_002BBDFC);
+        break;
+    case 20:
+        sceVu0CopyVector(delta, actor->move);
+        break;
+    case 19:
+        sceVu0CopyVector(delta, D_002C58A0);
+        break;
+    default:
+        move = g_ActorStates[actor->state].move;
+        if (move != NULL) {
+            move(actor, delta);
+        } else {
+            func_0014F798(actor, delta);
+        }
+        break;
+    }
+    if ((g_ActorStates[actor->state].flags >> 3) & 1) {
+        func_001568E8(actor, extra);
+        sceVu0AddVector(delta, delta, extra);
+    }
+    if (actor->unk_088 & 0x40) {
+        func_001564E0(actor, delta);
+    }
+    if ((s32)(*(u64*)&actor->unk_160 >> 2) & 1) {
+        sceVu0AddVector(delta, delta, actor->unk_200);
+    }
+    sceVu0AddVector(delta, delta, actor->unk_120);
+}
+
+/* The state an actor switches to after moving (0 or 2 unless the state decides). */
+s32 func_00144060(Actor* actor) {
+    s32 grounded;
+    s32 (*next)(Actor*, s32);
+
+    if (actor->pos[1] >= actor->body.unk_34) {
+        if ((func_0014F5C8() != 0 || func_0014F600(actor) != 0) && !(actor->flags & 0x400000)) {
+            func_0012C698(actor);
+        }
+        actor->flags |= 0x400000;
+    } else {
+        actor->flags &= ~0x400000;
+    }
+    grounded = 0;
+    if (actor->body.flags & 1) {
+        grounded = actor->unk_398 == NULL;
+    }
+    switch (actor->state) {
+    case 11:
+    case 19:
+    case 20:
+    case 22:
+    case 23:
+        return actor->state;
+    case 16:
+        if (grounded) {
+            return actor->state;
+        }
+        break;
+    case 17:
+        if (func_001443A8(actor) != 0) {
+            return actor->state;
+        }
+        if (grounded) {
+            return actor->state;
+        }
+        break;
+    default:
+        next = g_ActorStates[actor->state].next;
+        if (next != NULL) {
+            return next(actor, grounded);
+        }
+        break;
+    }
+    if (grounded || (actor->flags & 0x1000)) {
+        return 2;
+    }
+    return 0;
+}
 
 /* Per-frame movement of an actor: walking along its move vector, or physics */
 void func_001441B8(Actor* actor) {

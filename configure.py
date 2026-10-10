@@ -171,11 +171,11 @@ def write_objdiff(units):
 
 
 def align_jump_tables():
-    """ee-gcc aligns every jump table to 16 bytes (.align 4); splat writes .align 3 for rodata
-    migrated into function files, which shifts the tables that follow a compiled one."""
-    for path in Path("asm/nonmatchings").rglob("*.s"):
+    """ee-gcc aligns every jump table to 16 bytes (.align 4); splat writes .align 3, which
+    shifts the tables that follow a compiled object with a shorter .rodata."""
+    for path in Path("asm").rglob("*.s"):
         text = path.read_text()
-        fixed = re.sub(r"^\.section \.rodata\n\.align 3\n(?=nonmatching jtbl_)", ".section .rodata\n.align 4\n", text, flags=re.M)
+        fixed = re.sub(r"^\.align 3\n(?=nonmatching jtbl_)", ".align 4\n", text, flags=re.M)
         if fixed != text:
             path.write_text(fixed)
 

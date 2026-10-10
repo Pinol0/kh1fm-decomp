@@ -77,5 +77,6 @@ segments:
       # Data, rodata and small data of every object, not yet separated
       - [0x172C70, data, data]
       - [0x38E210, .rodata, game/actor_physics]
+      - [0x38E2D4, pad]                   # alignment of the next object (SUBALIGN(8) drops it)
       - [0x38E2E0, rodata, data_38E2E0]   # rest of the blob, as rodata so it links after the .rodata above
   - [0x394050]

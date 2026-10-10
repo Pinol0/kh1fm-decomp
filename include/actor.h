@@ -66,9 +66,13 @@ typedef void (*ActorStateFunc)(Actor* actor, sceVu0FVECTOR move);
 
 /* One row per actor state: g_ActorStates[actor->state] */
 typedef struct {
-    /* 0x00 */ void* unk_00;
-    /* 0x04 */ ActorStateFunc update;
-    /* 0x08 */ void* unk_08[6];
+    /* 0x00 */ u32 flags;                    /* bit 3: add func_001568E8's move */
+    /* 0x04 */ u8 unk_04[4];
+    /* 0x08 */ void* unk_08;
+    /* 0x0C */ ActorStateFunc update;
+    /* 0x10 */ ActorStateFunc move;          /* per-frame move, func_0014F798 if NULL */
+    /* 0x14 */ s32 (*next)(Actor* actor, s32 arg1); /* state to switch to */
+    /* 0x18 */ u8 unk_18[8];
 } ActorState; // size = 0x20
 
 /* Characters and objects of the field (Sora is *D_002E26A0[0]). Partial. */
