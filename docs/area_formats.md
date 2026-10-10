@@ -1,5 +1,13 @@
 # Area data formats
 
+Tools: `tools/kingdom_img.py` reads files out of the ISO (KINGDOM.IDX / IMG),
+`tools/collision2obj.py` exports the collision of an area `.bin` to OBJ (with a top-view PNG).
+
+```sh
+python3 tools/kingdom_img.py game.iso extract tw00_01.bin
+python3 tools/collision2obj.py tw00_01.bin tw00_01.obj --png tw00_01.png
+```
+
 What the executable reads when an area loads. Verified against the game running in PCSX2
 (Dive to the Heart) through PINE (`tools/pine.py`); offsets are from the start of each file.
 
@@ -52,6 +60,10 @@ loading.
 | 0x20 / 0x24 | ? (planes or bounds) | 16 | 1 |
 | 0x28 / 0x2C | pointers, relocated against 0x38 (-1 = none) | 4 | 1024 (acceleration grid) |
 | 0x30 / 0x34 | node pointers, relocated against 0x40 | 4 | 191 |
+
+A polygon (20 bytes): `u16` vertex indices at +0x00..+0x06 (the 4th is 0xFFFF or 0xFFFE for a
+triangle), `u16` index into the 8-byte table at +0x08, attributes from +0x0A, flags `u32` at +0x10
+(bit 0: ignored by the game).
 
 A node is an axis-aligned box (min x, y, z at +0x00, max at +0x0C), a `u16` polygon count at
 +0x18 and that many `u16` polygon indices from +0x1A. Polygon flags are at +0x10 (bit 0: ignored).
