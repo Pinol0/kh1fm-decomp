@@ -11,7 +11,7 @@ from pathlib import Path
 unit, func, variants = sys.argv[1:4]
 src = Path("src") / f"{unit}.c"
 orig = src.read_text()
-m = re.search(rf"^[^\n;]*\b{func}\([^;{{]*\)\s*\{{", orig, re.M)
+m = re.search(rf"^[A-Za-z_][^\n;]*\b{func}\([^;{{]*\)\s*\{{", orig, re.M)
 start = m.start()
 depth, i = 0, orig.index("{", start)
 while True:

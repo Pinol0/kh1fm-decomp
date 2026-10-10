@@ -8,7 +8,7 @@
 
 s32 func_001232F0(Actor* actor);
 void func_00143A70(Actor* actor, sceVu0FVECTOR move, s32 arg2);
-u8 func_00142618(Actor* actor);
+s32 func_00142618(Actor* actor);
 s32 func_00123330(Actor* actor);
 void func_0015BAD0(Actor* actor, s32 arg1, f32* out);
 u8 func_00142388(sceVu0FVECTOR pos, u32* arg1);
@@ -27,6 +27,12 @@ void func_00143180(Actor* actor, sceVu0FVECTOR move);
 void func_0014F798(Actor* actor, sceVu0FVECTOR delta);
 void func_001568E8(Actor* actor, sceVu0FVECTOR out);
 void func_001564E0(Actor* actor, sceVu0FVECTOR delta);
+u8 func_00105BC0(s32 platform, s16 poly);
+s32 func_00105B68(s32 platform, s16 poly);
+f32 func_00120C18(sceVu0FVECTOR v); /* length */
+void func_00105C98(s16 poly, u32* out);
+f32 func_00144368(void);
+s32 func_00137450(s32 arg0);
 s32 func_0014F5C8(void);
 s32 func_0014F600(Actor* actor);
 void func_0012C698(Actor* actor);
@@ -57,19 +63,144 @@ typedef struct {
 
 extern PlatformTable D_003044D8;
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142388);
+/* Ray down from pos: the surface type below, and its colour (out[4]); 0 if nothing is below. */
+u8 func_00142388(sceVu0FVECTOR pos, u32* out) {
+    CollisionRay ray;
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142470);
+    sceVu0CopyVector(ray.pos, pos);
+    ray.pos[3] = 1.0f;
+    ray.ray[0] = 0.0f;
+    ray.ray[1] = 100000.0f;
+    ray.ray[2] = 0.0f;
+    ray.ray[3] = 1.0f;
+    func_00118668(&ray);
+    if (ray.poly >= 0) {
+        if (ray.platform == -1) {
+            func_00105C98(ray.poly, out);
+        } else {
+            for (i = 0; i < 4; i++) {
+                out[i] = D_003044E0[ray.platform].actor->unk_350[i];
+            }
+        }
+        return func_00105BC0(ray.platform, ray.poly);
+    }
+    return 0;
+}
 
+void func_00142470(Actor* actor, u128* colour) {
+    *(u128*)actor->unk_350 = *colour;
+}
+
+#ifdef NON_MATCHING
+// Equivalent; move and the step count get swapped registers.
+/*
+ * Sweeps a ray along move in steps of at most 100 units; at the first hit, writes the hit
+ * point and returns func_00105B68 of what was hit. -1 if nothing was hit.
+ */
+s32 func_00142480(sceVu0FVECTOR pos, sceVu0FVECTOR move, s32 arg2, sceVu0FVECTOR hit) {
+    CollisionRay ray;
+    s32 steps;
+    s32 i;
+
+    sceVu0CopyVector(ray.pos, pos);
+    steps = func_00120C18(move) / 100.0f;
+    if (steps >= 2) {
+        sceVu0ScaleVector(ray.ray, move, 1.0f / steps);
+    } else {
+        steps = 1;
+        sceVu0CopyVector(ray.ray, move);
+    }
+    ray.ray[3] = 1.0f;
+    for (i = 0; i < steps; i++) {
+        ray.pos[3] = 1.0f;
+        func_00118628(&ray, arg2);
+        if (ray.poly >= 0) {
+            sceVu0CopyVector(hit, ray.hit);
+            return func_00105B68(ray.platform, ray.poly);
+        }
+        sceVu0AddVector(ray.pos, ray.pos, ray.ray);
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142480);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_001425D0);
+s32 func_001425D0(Actor* actor) {
+    s32 ret = 0;
 
+    if ((actor->flags & 0x200000) || (actor->unk_088 & 1) || actor->unk_130->unk_18 == 0.0f) {
+        ret = 1;
+    }
+    return ret;
+}
+
+#ifdef NON_MATCHING
+// Equivalent; one register differs (the actor below).
+/* Surface type below an actor: from the actor it stands on, or by height in the air. */
+s32 func_00142618(Actor* actor) {
+    s32 surface;
+    f32 height;
+
+    if (actor->unk_398 != NULL && !((actor->unk_398->unk_370 >> 39) & 1)) {
+        return actor->unk_398->unk_130->unk_5D;
+    }
+    surface = actor->unk_360;
+    if (actor->body.unk_34 <= actor->pos[1]) {
+        height = func_00144368();
+        if (height < 20.0f) {
+            surface = 10;
+        } else if (height < 50.0f) {
+            surface = 11;
+        } else {
+            surface = 12;
+        }
+    }
+    return surface;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142618);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_001426A8);
+/* Snaps pos to the ground found within +-range of its height; returns polygon + 1, 0 if none. */
+s32 func_001426A8(sceVu0FVECTOR pos, f32 range) {
+    CollisionRay ray;
 
+    sceVu0CopyVector(ray.pos, pos);
+    ray.pos[1] -= range;
+    ray.pos[3] = 1.0f;
+    ray.ray[0] = 0.0f;
+    ray.ray[1] = range + range;
+    ray.ray[2] = 0.0f;
+    ray.ray[3] = 1.0f;
+    func_00118668(&ray);
+    if (ray.poly < 0) {
+        return 0;
+    }
+    pos[1] = ray.hit[1];
+    return ray.poly + 1;
+}
+
+#ifdef NON_MATCHING
+// Equivalent; loads and stores of the out value scheduled differently.
+s32 func_00142730(Actor* actor, s32* platform) {
+    switch (actor->state) {
+    case 13:
+        *platform = -1;
+        return actor->unk_148->unk_5C;
+    case 15:
+    case 16:
+        *platform = func_00137450(actor->unk_148->unk_94);
+        return actor->unk_148->unk_90;
+    default:
+        *platform = actor->body.platform;
+        return actor->body.unk_3C;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_00142730);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/game/actor_physics", func_001427D0);
 

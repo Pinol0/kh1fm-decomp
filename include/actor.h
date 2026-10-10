@@ -16,10 +16,14 @@ typedef struct {
 struct ActorUnk130 {
     /* 0x00 */ u8 unk_00[4];
     /* 0x04 */ u32 unk_04;
-    /* 0x08 */ u8 unk_08[0x44];
+    /* 0x08 */ u8 unk_08[0x10];
+    /* 0x18 */ f32 unk_18;
+    /* 0x1C */ u8 unk_1C[0x30];
     /* 0x4C */ u16 unk_4C;
     /* 0x4E */ u8 unk_4E[6];
     /* 0x54 */ s8 unk_54; /* 0: input comes from func_001271B0 */
+    /* 0x55 */ u8 unk_55[8];
+    /* 0x5D */ u8 unk_5D;  /* surface type when standing on this actor */
 };
 
 struct ActorUnk134 {
@@ -28,8 +32,11 @@ struct ActorUnk134 {
 };
 
 struct ActorUnk148 {
-    /* 0x00 */ u8 unk_00[0x90];
+    /* 0x00 */ u8 unk_00[0x5C];
+    /* 0x5C */ s32 unk_5C;
+    /* 0x60 */ u8 unk_60[0x30];
     /* 0x90 */ s32 unk_90;
+    /* 0x94 */ s32 unk_94;
 };
 
 struct ActorUnk14C_2C {
@@ -53,7 +60,8 @@ typedef struct {
     /* 0x30 */ u32 flags;
     /* 0x34 */ f32 unk_34;
     /* 0x38 */ u16 surface;  /* surface type below, 0 if none */
-    /* 0x3A */ u8 unk_3A[4];
+    /* 0x3A */ u8 unk_3A[2];
+    /* 0x3C */ u16 unk_3C;
     /* 0x3E */ u16 unk_3E;   /* 0xFFFF: blocked (state 10) */
     /* 0x40 */ sceVu0FVECTOR target; /* where the move ends after collision */
     /* 0x50 */ u8 unk_50[0x1E];
@@ -118,7 +126,8 @@ struct Actor {
     /* 0x330 */ u8 unk_330[0x10];
     /* 0x340 */ sceVu0FVECTOR unk_340; /* ground normal */
     /* 0x350 */ u32 unk_350[4] __attribute__((aligned(16)));
-    /* 0x360 */ u8 unk_360[0x10];
+    /* 0x360 */ s32 unk_360;           /* surface type when in the air */
+    /* 0x364 */ u8 unk_364[0xC];
     /* 0x370 */ u64 unk_370;           /* bit 50 follows D_002C5958.unk_0 */
     /* 0x378 */ u8 unk_378[0x20];
     /* 0x398 */ struct Actor* unk_398; /* actor this one stands on */

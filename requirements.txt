@@ -3,3 +3,5 @@ spimdisasm>=1.42.4
 ninja_syntax
 pyelftools
 m2c @ git+https://github.com/matt-kempster/m2c.git
+toml
+pycparser
