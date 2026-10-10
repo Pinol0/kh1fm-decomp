@@ -1,11 +1,13 @@
 # Area data formats
 
 Tools: `tools/kingdom_img.py` reads files out of the ISO (KINGDOM.IDX / IMG),
-`tools/collision2obj.py` exports the collision of an area `.bin` to OBJ (with a top-view PNG).
+`tools/collision2obj.py` exports the collision of an area `.bin` to OBJ (with a top-view PNG),
+`tools/map2obj.py` exports its visible geometry (vertex colours, texture coordinates).
 
 ```sh
 python3 tools/kingdom_img.py game.iso extract tw00_01.bin
 python3 tools/collision2obj.py tw00_01.bin tw00_01.obj --png tw00_01.png
+python3 tools/map2obj.py tw00_01.bin tw00_01_map.obj --png tw00_01_map.png
 ```
 
 What the executable reads when an area loads. Verified against the game running in PCSX2
@@ -72,3 +74,24 @@ Queries (`func_00118378`) take a segment (start at +0x00, end at +0x10 of the qu
 candidate nodes from the grid, test the polygons of the nodes whose box meets the query box, and
 return the nearest hit point (+0x20) and polygon (+0x30, -1 if none). Two collision sets can be
 loaded; `func_00104528` / `func_00104678` switch the active one (`D_002A62EC`).
+
+## Map geometry (`.bin` entry 2)
+
+Read by `func_00106ED0`. `u32 parts` at 0x00, `u32` offset of a DMA table at 0x04, then one
+0x80-byte record per part from 0x10: the 8 corners of its bounding box (vec4; some `w` hold
+per-part parameters, reset to 1.0 on load). Table entry 0 is a header; entry `i + 1` is the DMA
+"ref" tag of part `i` (`0x3000xxxx`, low 16 bits = quadword count) and the offset of its VIF
+packet. Traverse Town's First District: 897 parts.
+
+A VIF packet is a series of batches, each drawn by the VU1 program on `MSCNT`:
+
+| VIF | Data |
+|---|---|
+| UNPACK V4-32, 1 qw @ 0 | GIF tag: vertex count, registers ST / RGBAQ / XYZ2 |
+| STCYCL cl=3 wl=1 | vertices interleaved over 3 quadwords |
+| UNPACK V4-32 @ 1 | position x, y, z, w; w = 0: no triangle, w != 0: closes a strip triangle (sign = winding) |
+| UNPACK V4-8 (unsigned) @ 2 | colour RGBA (0x80 = 1.0): baked lighting |
+| UNPACK V2-16 @ 3 | texture coordinates, 4096 = 1.0 |
+| DIRECT, 3 qw | GS registers for the batch (texture) |
+
+Not decoded yet: the textures (probably the `.img`, entries 3/4 and the DIRECT packets).
